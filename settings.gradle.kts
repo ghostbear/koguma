@@ -65,7 +65,7 @@ fun VersionCatalogBuilder.compose() {
 }
 
 fun VersionCatalogBuilder.firebase() {
-    library("firebase-bom", "com.google.firebase", "firebase-bom").version("30.3.1")
+    library("firebase-bom", "com.google.firebase", "firebase-bom").version("30.3.2")
     library("firebase-analytics", "com.google.firebase", "firebase-analytics-ktx").version("")
     library("firebase-crashlytics", "com.google.firebase", "firebase-crashlytics-ktx").version("")
 }
