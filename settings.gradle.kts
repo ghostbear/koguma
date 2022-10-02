@@ -53,7 +53,7 @@ fun VersionCatalogBuilder.androidx() {
     val agp = version("agp", "7.3.0-rc01")
 
     library("androidx-viewmodel-compose", "androidx.lifecycle", "lifecycle-viewmodel-compose").version("2.5.1")
-    library("androidx-corektx", "androidx.core", "core-ktx").version("1.8.0")
+    library("androidx-corektx", "androidx.core", "core-ktx").version("1.9.0")
     library("androidx-lifecycle-runtimektx", "androidx.lifecycle", "lifecycle-runtime-ktx").version("2.5.1")
     library("androidx-activity-compose", "androidx.activity", "activity-compose").version("1.5.1")
     library("androidx-junit", "androidx.test.ext", "junit").version("1.1.3")
