@@ -88,7 +88,7 @@ fun VersionCatalogBuilder.compose() {
 }
 
 fun VersionCatalogBuilder.firebase() {
-    library("google-services", "com.google.gms", "google-services").version("4.3.13")
+    library("google-services", "com.google.gms", "google-services").version("4.3.14")
 
     library("firebase-bom", "com.google.firebase", "firebase-bom").version("30.3.2")
     library("firebase-analytics-ktx", "com.google.firebase", "firebase-analytics-ktx").version("")
