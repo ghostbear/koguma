@@ -93,7 +93,7 @@ fun VersionCatalogBuilder.firebase() {
     library("firebase-bom", "com.google.firebase", "firebase-bom").version("30.3.2")
     library("firebase-analytics-ktx", "com.google.firebase", "firebase-analytics-ktx").version("")
     library("firebase-crashlytics-ktx", "com.google.firebase", "firebase-crashlytics-ktx").version("")
-    library("firebase-crashlytics-gradle", "com.google.firebase", "firebase-crashlytics-gradle").version("2.9.1")
+    library("firebase-crashlytics-gradle", "com.google.firebase", "firebase-crashlytics-gradle").version("2.9.2")
 
     plugin("google-services", "com.google.gms.google-services").version("")
     plugin("firebase-crashlytics", "com.google.firebase.crashlytics").version("")
