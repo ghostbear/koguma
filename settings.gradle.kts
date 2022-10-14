@@ -120,7 +120,7 @@ fun VersionCatalogBuilder.hilt() {
 fun VersionCatalogBuilder.kotlinx() {
     val kotlin = version("kotlin", "1.7.20")
 
-    library("kotlinx-serialization", "org.jetbrains.kotlinx", "kotlinx-serialization-json").version("1.4.0")
+    library("kotlinx-serialization", "org.jetbrains.kotlinx", "kotlinx-serialization-json").version("1.4.1")
 
     plugin("kotlinx-serialization", "org.jetbrains.kotlin.plugin.serialization").versionRef(kotlin)
     plugin("kotlin-android", "org.jetbrains.kotlin.android").versionRef(kotlin)
