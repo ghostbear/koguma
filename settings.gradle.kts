@@ -57,7 +57,7 @@ fun VersionCatalogBuilder.androidx() {
     library("androidx-viewmodel-compose", "androidx.lifecycle", "lifecycle-viewmodel-compose").version("2.5.1")
     library("androidx-corektx", "androidx.core", "core-ktx").version("1.9.0")
     library("androidx-lifecycle-runtimektx", "androidx.lifecycle", "lifecycle-runtime-ktx").version("2.5.1")
-    library("androidx-activity-compose", "androidx.activity", "activity-compose").version("1.6.0")
+    library("androidx-activity-compose", "androidx.activity", "activity-compose").version("1.6.1")
     library("androidx-junit", "androidx.test.ext", "junit").version("1.1.3")
     library("androidx-espresso", "androidx.test.espresso", "espresso-core").version("3.4.0")
 
