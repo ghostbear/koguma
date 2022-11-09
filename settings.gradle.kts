@@ -84,7 +84,7 @@ fun VersionCatalogBuilder.compose() {
     library("compose-icons", "androidx.compose.material", "material-icons-extended").versionRef(compose)
     library("compose-ui-core", "androidx.compose.ui", "ui").versionRef(compose)
     library("compose-ui-toolingpreview", "androidx.compose.ui", "ui-tooling-preview").versionRef(compose)
-    library("compose-material3", "androidx.compose.material3", "material3").version("1.0.0-rc01")
+    library("compose-material3", "androidx.compose.material3", "material3").version("1.0.1")
     library("compose-junit", "androidx.compose.ui", "ui-test-junit4").versionRef(compose)
     library("compose-ui-tooling", "androidx.compose.ui", "ui-tooling").versionRef(compose)
     library("compose-ui-testmanifest", "androidx.compose.ui", "ui-test-manifest").versionRef(compose)
