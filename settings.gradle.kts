@@ -94,7 +94,7 @@ fun VersionCatalogBuilder.compose() {
 fun VersionCatalogBuilder.firebase() {
     library("google-services", "com.google.gms", "google-services").version("4.3.14")
 
-    library("firebase-bom", "com.google.firebase", "firebase-bom").version("30.5.0")
+    library("firebase-bom", "com.google.firebase", "firebase-bom").version("31.1.0")
     library("firebase-analytics-ktx", "com.google.firebase", "firebase-analytics-ktx").version("")
     library("firebase-crashlytics-ktx", "com.google.firebase", "firebase-crashlytics-ktx").version("")
     library("firebase-crashlytics-gradle", "com.google.firebase", "firebase-crashlytics-gradle").version("2.9.2")
