@@ -38,7 +38,7 @@ fun VersionCatalogBuilder.general() {
 
     library("coil-compose", "io.coil-kt", "coil-compose").version("2.2.2")
 
-    library("xml-core", "io.github.pdvrieze.xmlutil", "core-android").version("0.84.3")
+    library("xml-core", "io.github.pdvrieze.xmlutil", "core-android").version("0.85.0")
     library("xml", "io.github.pdvrieze.xmlutil", "serialization-android").version("0.84.3")
 
     plugin("ktlint", "org.jlleitschuh.gradle.ktlint").version("11.0.0")
