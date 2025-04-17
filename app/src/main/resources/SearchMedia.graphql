@@ -1,0 +1,47 @@
+query SearchMedia(
+  $query: String!
+  $page: Int!,
+  $format_in: [MediaFormat]
+  $format_not_in: [MediaFormat]
+) {
+  Page(
+    page: $page,
+    perPage: 1
+  ) {
+    pageInfo {
+      currentPage
+      lastPage
+    }
+    media(
+      format_not_in: $format_not_in
+      format_in: $format_in
+      search: $query
+    ) {
+      id
+      type
+      format
+      title {
+        userPreferred
+      }
+      description
+      coverImage {
+        extraLarge
+        large
+        medium
+        color
+      }
+      seasonYear
+      season
+      startDate {
+        day
+        month
+        year
+      }
+      meanScore
+      genres
+      status
+      episodes
+      chapters
+    }
+  }
+}

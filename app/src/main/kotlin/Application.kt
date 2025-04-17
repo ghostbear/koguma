@@ -1,8 +1,13 @@
 package me.ghostbear.koguma
 
+import com.example.generated.SearchMedia
+import com.example.generated.enums.MediaFormat
+import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
+import com.expediagroup.graphql.client.serialization.GraphQLClientKotlinxSerializer
 import com.eygraber.uri.Uri
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.RemovalCause
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -16,8 +21,10 @@ import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import dev.kord.rest.builder.interaction.string
+import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
-import dev.kord.rest.builder.message.messageFlags
+import dev.kord.rest.builder.message.embed
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
@@ -39,15 +46,77 @@ data class MediaQuerySession(
     val page: Int = 1,
 )
 
+fun SearchMedia.Result.toResponse(): MessageBuilder.() -> Unit = {
+    embed {
+        val media = Page?.media?.first()
+        title = media?.title?.userPreferred
+        description = media?.description
+        thumbnail {
+            url = media?.coverImage?.extraLarge ?: media?.coverImage?.large ?: media?.coverImage?.medium!!
+        }
+        field {
+            name = "Type"
+            value = media?.type?.name!!
+            inline = true
+        }
+        field {
+            name = "Year"
+            value = "${media?.seasonYear}"
+            inline = true
+        }
+        field {
+            name = "Mean Score"
+            value = "${media?.meanScore}"
+            inline = true
+        }
+        field {
+            name = "Genres"
+            value = media?.genres?.joinToString(", ")!!
+        }
+    }
+    actionRow {
+        val pageInfo = Page?.pageInfo
+        interactionButton(ButtonStyle.Primary, "koguma://previous") {
+            disabled = pageInfo?.currentPage!! <= 1
+            label = "Previous"
+        }
+        interactionButton(ButtonStyle.Secondary, "koguma://nothing") {
+            disabled = true
+            label = "${pageInfo?.currentPage}/${pageInfo?.lastPage}"
+        }
+        interactionButton(ButtonStyle.Primary, "koguma://next") {
+            disabled = pageInfo?.currentPage!! >= pageInfo.lastPage!!
+            label = "Next"
+        }
+    }
+}
+
+class AniListMediaDataSource(
+    val httpClient: GraphQLKtorClient,
+) {
+    suspend fun query(query: String, page: Int = 1): SearchMedia.Result? {
+        return httpClient.execute(
+            SearchMedia(
+                variables = SearchMedia.Variables(
+                    query = query,
+                    page = page,
+                    format_not_in = listOf(MediaFormat.MANGA, MediaFormat.NOVEL)
+                )
+            )
+        ).data
+    }
+}
+
 val logger = LoggerFactory.getLogger("me.ghostbear.koguma.ApplicationKt")
 
 suspend fun main(args: Array<String>) {
     val kord = Kord(args.firstOrNull() ?: error("Missing required argument 'token'"))
 
     val session: Cache<MediaSessionId, MediaQuerySession> = Caffeine.newBuilder()
-        .expireAfterWrite(10, TimeUnit.SECONDS)
-        .maximumSize(2)
+        .expireAfterWrite(5, TimeUnit.MINUTES)
+        .maximumSize(32)
         .removalListener<MediaSessionId, MediaQuerySession> { id, session, cause ->
+            if (cause == RemovalCause.REPLACED) return@removalListener
             logger.info("Removed session $id")
             kord.launch {
                 val (channelId, messageId) = id!!
@@ -57,6 +126,12 @@ suspend fun main(args: Array<String>) {
             }
         }
         .build()
+
+    val client = GraphQLKtorClient(
+        url = URL("https://graphql.anilist.co/"),
+        serializer = GraphQLClientKotlinxSerializer()
+    )
+    val aniListMediaDataSource = AniListMediaDataSource(client)
 
     kord.createGlobalChatInputCommand(
         "anime",
@@ -74,27 +149,15 @@ suspend fun main(args: Array<String>) {
             val deferredResponse = interaction.deferPublicResponse()
             val query = command.strings["query"]!!
 
+            val media = aniListMediaDataSource.query(query)
+
             val response = deferredResponse.respond {
-                content = "Will search for \"${query}\""
-                actionRow {
-                    interactionButton(ButtonStyle.Primary, "koguma://previous") {
-                        disabled = true
-                        label = "Previous"
-                    }
-                    interactionButton(ButtonStyle.Secondary, "koguma://nothing") {
-                        disabled = true
-                        label = "1/10"
-                    }
-                    interactionButton(ButtonStyle.Primary, "koguma://next") {
-                        disabled = false
-                        label = "Next"
-                    }
-                }
+                media?.toResponse()?.invoke(this)
             }
 
             session.put(
                 response.message.toSessionId(),
-                MediaQuerySession(query)
+                MediaQuerySession(query, media?.Page?.pageInfo?.currentPage!!)
             )
         }
     }
@@ -103,8 +166,7 @@ suspend fun main(args: Array<String>) {
 
         val uri = Uri.parse(interaction.componentId)
 
-        if (interaction.user.id != interaction.message.interaction?.user?.id)
-        {
+        if (interaction.user.id != interaction.message.interaction?.user?.id) {
             return@on
         }
 
@@ -112,26 +174,17 @@ suspend fun main(args: Array<String>) {
             val sessionId = interaction.message.toSessionId()
             val sessionOrNull = session.getIfPresent(sessionId)
             if (sessionOrNull != null) {
-                interaction.updatePublicMessage {
-                    content = "Fetching next page for: ${sessionOrNull.query}"
-                    actionRow {
-                        interactionButton(ButtonStyle.Primary, "koguma://previous") {
-                            disabled = false
-                            label = "Previous"
-                        }
-                        interactionButton(ButtonStyle.Secondary, "koguma://nothing") {
-                            disabled = true
-                            label = "1/10"
-                        }
-                        interactionButton(ButtonStyle.Primary, "koguma://next") {
-                            disabled = true
-                            label = "Next"
-                        }
-                    }
-                }
+                val page = sessionOrNull.page + 1
+                val media = aniListMediaDataSource.query(sessionOrNull.query, page)
+
+                session.put(
+                    sessionId,
+                    sessionOrNull.copy(page = page)
+                )
+
+                interaction.updatePublicMessage { media?.toResponse()?.invoke(this) }
             } else {
                 interaction.updatePublicMessage {
-                    content = "Disabled interaction because session doesn't exist: $sessionId"
                     components = mutableListOf()
                 }
             }
@@ -140,23 +193,15 @@ suspend fun main(args: Array<String>) {
             val sessionId = interaction.message.toSessionId()
             val sessionOrNull = session.getIfPresent(sessionId)
             if (sessionOrNull != null) {
-                interaction.updatePublicMessage {
-                    content = "Fetching previous page for: ${sessionOrNull.query}"
-                    actionRow {
-                        interactionButton(ButtonStyle.Primary, "koguma://previous") {
-                            disabled = true
-                            label = "Previous"
-                        }
-                        interactionButton(ButtonStyle.Secondary, "koguma://nothing") {
-                            disabled = true
-                            label = "1/10"
-                        }
-                        interactionButton(ButtonStyle.Primary, "koguma://next") {
-                            disabled = false
-                            label = "Next"
-                        }
-                    }
-                }
+                val page = sessionOrNull.page - 1
+                val media = aniListMediaDataSource.query(sessionOrNull.query, page)
+
+                session.put(
+                    sessionId,
+                    sessionOrNull.copy(page = page)
+                )
+
+                interaction.updatePublicMessage { media?.toResponse()?.invoke(this) }
             } else {
                 interaction.updatePublicMessage {
                     content = "Disabled interaction because session doesn't exist: $sessionId"
