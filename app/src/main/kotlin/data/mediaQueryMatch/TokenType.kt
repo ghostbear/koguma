@@ -1,0 +1,11 @@
+package me.ghostbear.koguma.data.mediaQueryParser
+
+enum class TokenType {
+    LEFT_DOUBLE_BRACES, RIGHT_DOUBLE_BRACES,
+    LEFT_BRACKETS, LEFT_DOUBLE_BRACKETS, RIGHT_BRACKETS, RIGHT_DOUBLE_BRACKETS,
+    DOUBLE_LESSER_THAN, DOUBLE_GREATER_THAN,
+
+    STRING, NUMBER,
+
+    EOF
+}
