@@ -27,16 +27,16 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     implementation(libs.bundles.kotlinx)
-    implementation("com.eygraber:uri-kmp:0.0.19")
+    implementation(libs.uri)
     implementation(libs.kord.core)
-    implementation("ch.qos.logback:logback-classic:1.5.18")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
+    implementation(libs.logback.classic)
+    implementation(libs.caffeine)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.graphql.kotlin.ktor.client)
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.1.20")
+    testImplementation(libs.kotlin.test.junit5)
 }
 
 application {

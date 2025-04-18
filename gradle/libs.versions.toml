@@ -9,12 +9,16 @@ kotlinx-serialization-json = "1.7.2"
 kotlinx-coroutines = "1.8.1"
 kord = "0.15.0"
 ktor = "3.1.2"
+caffeine = "3.2.0"
+uri = "0.0.19"
+logback = "1.5.18"
 expedia-graphql = "8.6.0"
 
 [libraries]
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 
 kord-core = { module = "dev.kord:kord-core", version.ref = "kord" }
 
@@ -23,6 +27,9 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 graphql-kotlin-ktor-client = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "expedia-graphql" }
 
 [bundles]
