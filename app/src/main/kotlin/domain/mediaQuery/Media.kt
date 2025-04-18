@@ -4,6 +4,7 @@ import kotlinx.datetime.DateTimeUnit
 
 interface Media {
     val id: Long
+    val url: String
     val title: String
     val description: String
     val thumbnailUrl: String

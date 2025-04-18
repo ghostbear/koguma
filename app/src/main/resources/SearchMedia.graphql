@@ -18,6 +18,7 @@ query SearchMedia(
       search: $query
     ) {
       id
+      siteUrl
       type
       format
       title {

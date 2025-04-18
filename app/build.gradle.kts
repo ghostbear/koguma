@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.graphql.kotlin.ktor.client)
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.1.20")
 }
 
 application {

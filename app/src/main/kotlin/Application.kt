@@ -11,17 +11,25 @@ import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.newSingleThreadContext
 import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQuery.CaffeineMediaQuerySessionizer
+import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.presentation.mediaQuery.ChannelIdAndMessageId
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
+
 
 suspend fun main(args: Array<String>) {
     val kord = Kord(args.firstOrNull() ?: error("Missing required argument 'token'"))
 
     kord.mediaQueryModule(
+        InterpreterMediaQueryMatcher(),
         AniListMediaDataSource(
             GraphQLKtorClient(
                 url = URL("https://graphql.anilist.co/"),

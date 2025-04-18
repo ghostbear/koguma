@@ -1,6 +1,13 @@
 package me.ghostbear.koguma.domain.mediaQuery
 
 sealed interface MediaResult<out T : Media> {
-    data class Success<T : Media>(val media: T, val mediaQuery: MediaQuery) : MediaResult<T>
-    data class Error(val message: String) : MediaResult<Nothing>
+    val mediaQuery: MediaQuery
+
+    data class Success(val media: Media, override val mediaQuery: MediaQuery) : MediaResult<Media>
+
+    sealed interface Error<out T : Media> : MediaResult<T> {
+        data class NotFound(override val mediaQuery: MediaQuery) : MediaResult<Nothing>
+        data class Message(val message: String, override val mediaQuery: MediaQuery) : MediaResult<Nothing>
+    }
+
 }

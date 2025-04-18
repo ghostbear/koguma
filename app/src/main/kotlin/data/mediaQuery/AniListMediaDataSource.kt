@@ -4,6 +4,12 @@ import com.example.generated.SearchMedia
 import com.example.generated.enums.MediaFormat
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
@@ -11,26 +17,41 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 
 class AniListMediaDataSource(
-    val client: GraphQLKtorClient
+    val client: GraphQLKtorClient,
 ) : MediaDataSource {
     override suspend fun query(mediaQuery: MediaQuery): MediaResult<Media> {
         val response = _query(mediaQuery)
 
         if (response.errors != null && response.errors!!.isNotEmpty()) {
-            return MediaResult.Error(response.errors!!.joinToString(separator = ",") { it.message })
+            return MediaResult.Error.Message(response.errors!!.joinToString(separator = ",") { it.message }, mediaQuery)
         }
 
         val page = response.data?.Page
-        // TODO check
-        val pageInfo = page?.pageInfo
-        // TODO check
-        val mediaOrNull = page?.media?.firstOrNull()
-        // TODO check
+        if (page == null) {
+            return MediaResult.Error.Message("Missing page", mediaQuery)
+        }
+
+        val pageInfo = page.pageInfo
+        if (pageInfo == null) {
+            return MediaResult.Error.Message("Missing page info", mediaQuery)
+        }
+
+        val mediaOrNull = page.media?.firstOrNull()
+        if (mediaOrNull == null) {
+            return MediaResult.Error.NotFound(mediaQuery)
+        }
+
         return MediaResult.Success(
-            AniListMedia(mediaOrNull!!),
-            mediaQuery.copy(currentPage = pageInfo?.currentPage ?: 0, lastPage = pageInfo?.lastPage ?: 0)
+            AniListMedia(mediaOrNull),
+            mediaQuery.copy(currentPage = pageInfo.currentPage ?: 0, lastPage = pageInfo.lastPage ?: 0)
         )
 
+    }
+
+    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult<Media>> = coroutineScope {
+        withContext(Dispatchers.IO) {
+            mediaQuery.map { async { query(it) } }.awaitAll()
+        }
     }
 
     internal suspend fun _query(mediaQuery: MediaQuery): GraphQLClientResponse<SearchMedia.Result> {
@@ -64,6 +85,8 @@ class AniListMedia(
 
     override val id: Long
         get() = media.id.toLong()
+    override val url: String
+        get() = media.siteUrl ?: "https://anilist.co/${type.name.lowercase()}/${id}"
     override val title: String
         get() = media.title?.userPreferred ?: "Untitled"
     override val description: String
