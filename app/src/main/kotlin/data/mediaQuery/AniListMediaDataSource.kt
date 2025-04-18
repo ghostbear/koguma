@@ -4,7 +4,6 @@ import com.example.generated.SearchMedia
 import com.example.generated.enums.MediaFormat
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -79,31 +78,3 @@ class AniListMediaDataSource(
 
 }
 
-class AniListMedia(
-    val media: com.example.generated.searchmedia.Media
-) : Media {
-
-    override val id: Long
-        get() = media.id.toLong()
-    override val url: String
-        get() = media.siteUrl ?: "https://anilist.co/${type.name.lowercase()}/${id}"
-    override val title: String
-        get() = media.title?.userPreferred ?: "Untitled"
-    override val description: String
-        get() = media.description ?: "No description"
-    override val thumbnailUrl: String
-        get() = media.coverImage?.extraLarge ?: media.coverImage?.large ?: media.coverImage?.medium ?: "https://placehold.co/500x700?text=?"
-    override val type: MediaType
-        get() = when (media.type ?: com.example.generated.enums.MediaType.__UNKNOWN_VALUE) {
-            com.example.generated.enums.MediaType.ANIME -> MediaType.ANIME
-            com.example.generated.enums.MediaType.MANGA -> if (media.format == MediaFormat.MANGA) MediaType.MANGA else MediaType.NOVEL
-            com.example.generated.enums.MediaType.__UNKNOWN_VALUE -> throw IllegalArgumentException("Unknown media type")
-        }
-    override val year: Int
-        get() = media.seasonYear ?: -1
-    override val meanScore: Double
-        get() = media.meanScore?.toDouble() ?: -1.0
-    override val genres: List<String>
-        get() = media.genres?.filterNotNull() ?: emptyList()
-
-}
