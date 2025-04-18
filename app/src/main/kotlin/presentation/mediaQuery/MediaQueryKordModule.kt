@@ -20,7 +20,7 @@ import dev.kord.rest.builder.message.embed
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuerySessionizer
+import me.ghostbear.koguma.domain.session.SessionStore
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
@@ -37,10 +37,12 @@ fun Message.toSessionId(): ChannelIdAndMessageId {
     )
 }
 
+typealias MediaQuerySessionStore = SessionStore<ChannelIdAndMessageId, MediaQuery>
+
 suspend fun Kord.mediaQueryModule(
     matcher: MediaQueryMatcher,
     dataSource: MediaDataSource,
-    sessionizer: MediaQuerySessionizer<ChannelIdAndMessageId>
+    sessionStore: MediaQuerySessionStore
 ) {
 
     createGlobalChatInputCommand(
@@ -78,7 +80,7 @@ suspend fun Kord.mediaQueryModule(
                         with(mediaResult.media, mediaResult.mediaQuery)
                     }
 
-                    sessionizer.put(
+                    sessionStore.put(
                         response.message.toSessionId(),
                         mediaResult.mediaQuery
                     )
@@ -94,7 +96,7 @@ suspend fun Kord.mediaQueryModule(
 
         if (componentId == "next") {
             val sessionId = interaction.message.toSessionId()
-            val sessionOrNull = sessionizer.getOrNull(sessionId)
+            val sessionOrNull = sessionStore.getOrNull(sessionId)
             if (sessionOrNull != null) {
                 val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage + 1)
                 val mediaResult = dataSource.query(query)
@@ -104,7 +106,7 @@ suspend fun Kord.mediaQueryModule(
                             with(mediaResult.media, mediaResult.mediaQuery)
                         }
 
-                        sessionizer.put(sessionId, mediaResult.mediaQuery)
+                        sessionStore.put(sessionId, mediaResult.mediaQuery)
                     }
                     is MediaResult.Error.Message -> {
                     }
@@ -119,7 +121,7 @@ suspend fun Kord.mediaQueryModule(
         }
         if (componentId == "previous") {
             val sessionId = interaction.message.toSessionId()
-            val sessionOrNull = sessionizer.getOrNull(sessionId)
+            val sessionOrNull = sessionStore.getOrNull(sessionId)
             if (sessionOrNull != null) {
                 val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage - 1)
                 val mediaResult = dataSource.query(query)
@@ -129,7 +131,7 @@ suspend fun Kord.mediaQueryModule(
                             with(mediaResult.media, mediaResult.mediaQuery)
                         }
 
-                        sessionizer.put(sessionId, mediaResult.mediaQuery)
+                        sessionStore.put(sessionId, mediaResult.mediaQuery)
                     }
                     is MediaResult.Error.Message -> {
                     }
@@ -170,7 +172,7 @@ suspend fun Kord.mediaQueryModule(
                             with(mediaResult.media, mediaResult.mediaQuery)
                         }
 
-                        sessionizer.put(reply.toSessionId(), mediaResult.mediaQuery)
+                        sessionStore.put(reply.toSessionId(), mediaResult.mediaQuery)
                     }
 
                     is MediaResult.Error.Message -> {
