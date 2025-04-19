@@ -5,6 +5,7 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.withTyping
+import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.interaction.updatePublicMessage
 import dev.kord.core.behavior.reply
@@ -114,6 +115,11 @@ suspend fun Kord.mediaQueryModule(
                     interaction.updatePublicMessage(result.messageBuilder)
                     sessionStore.put(sessionId, result.mediaQuery)
                 }
+            }
+        }
+        if (componentId == "freeze") {
+            interaction.message.edit {
+                components = mutableListOf()
             }
         }
     }
@@ -275,9 +281,9 @@ fun MessageBuilder.actionRow(query: MediaQuery) {
             disabled = query.currentPage <= 1
             label = "Previous"
         }
-        interactionButton(ButtonStyle.Secondary, "void") {
-            disabled = true
-            label = "${query.currentPage}/${query.lastPage}"
+        interactionButton(ButtonStyle.Secondary, "freeze") {
+            disabled = false
+            label = "\u2744\uFE0F"
         }
         interactionButton(ButtonStyle.Primary, "next") {
             disabled = query.currentPage >= query.lastPage
