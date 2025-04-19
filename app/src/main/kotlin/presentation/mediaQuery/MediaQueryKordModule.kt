@@ -11,6 +11,7 @@ import dev.kord.core.entity.Message
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.core.on
 import dev.kord.rest.builder.interaction.string
 import dev.kord.rest.builder.message.MessageBuilder
@@ -20,10 +21,10 @@ import dev.kord.rest.builder.message.embed
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.domain.session.SessionStore
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
+import me.ghostbear.koguma.domain.session.SessionStore
 
 data class ChannelIdAndMessageId(
     val channelId: Snowflake,
@@ -73,18 +74,13 @@ suspend fun Kord.mediaQueryModule(
                 else -> throw IllegalArgumentException("Unknown type of command")
             }
 
-            val mediaResult = dataSource.query(MediaQuery(query, type))
-            when (mediaResult) {
+            val result = dataSource.query(MediaQuery(query, type))
+            when (result) {
                 is MediaResult.Success -> {
-                    val response = deferredResponse.respond {
-                        with(mediaResult.media, mediaResult.mediaQuery)
-                    }
-
-                    sessionStore.put(
-                        response.message.toSessionId(),
-                        mediaResult.mediaQuery
-                    )
+                    val message = deferredResponse.respond(result.messageBuilder)
+                    sessionStore.put(message.message.toSessionId(), result.mediaQuery)
                 }
+
                 is MediaResult.Error.Message -> deferredResponse.delete()
                 is MediaResult.Error.NotFound -> deferredResponse.delete()
             }
@@ -94,54 +90,24 @@ suspend fun Kord.mediaQueryModule(
     on<ButtonInteractionCreateEvent> {
         val componentId = interaction.componentId
 
-        if (componentId == "next") {
+        if (componentId == "next" || componentId == "previous") {
             val sessionId = interaction.message.toSessionId()
-            val sessionOrNull = sessionStore.getOrNull(sessionId)
-            if (sessionOrNull != null) {
-                val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage + 1)
-                val mediaResult = dataSource.query(query)
-                when (mediaResult) {
-                    is MediaResult.Success -> {
-                        interaction.updatePublicMessage {
-                            with(mediaResult.media, mediaResult.mediaQuery)
-                        }
-
-                        sessionStore.put(sessionId, mediaResult.mediaQuery)
-                    }
-                    is MediaResult.Error.Message -> {
-                    }
-                    is MediaResult.Error.NotFound -> {
-                    }
-                }
-            } else {
+            val sessionOrNull = sessionStore.getOrNull(sessionId) ?: return@on.also {
                 interaction.updatePublicMessage {
                     components = mutableListOf()
                 }
             }
-        }
-        if (componentId == "previous") {
-            val sessionId = interaction.message.toSessionId()
-            val sessionOrNull = sessionStore.getOrNull(sessionId)
-            if (sessionOrNull != null) {
-                val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage - 1)
-                val mediaResult = dataSource.query(query)
-                when (mediaResult) {
-                    is MediaResult.Success -> {
-                        interaction.updatePublicMessage {
-                            with(mediaResult.media, mediaResult.mediaQuery)
-                        }
 
-                        sessionStore.put(sessionId, mediaResult.mediaQuery)
-                    }
-                    is MediaResult.Error.Message -> {
-                    }
-                    is MediaResult.Error.NotFound -> {
-                    }
-                }
-            } else {
-                interaction.updatePublicMessage {
-                    content = "Disabled interaction because session doesn't exist: $sessionId"
-                    components = mutableListOf()
+            val direction = if (componentId == "next") 1 else -1
+            val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage + direction)
+
+            val result = dataSource.query(query)
+            when (result) {
+                is MediaResult.Error.Message -> {}
+                is MediaResult.Error.NotFound -> {}
+                is MediaResult.Success -> {
+                    interaction.updatePublicMessage(result.messageBuilder)
+                    sessionStore.put(sessionId, result.mediaQuery)
                 }
             }
         }
@@ -169,7 +135,7 @@ suspend fun Kord.mediaQueryModule(
                             allowedMentions {
                                 repliedUser = false
                             }
-                            with(mediaResult.media, mediaResult.mediaQuery)
+                            mediaResult.messageBuilder(this)
                         }
 
                         sessionStore.put(reply.toSessionId(), mediaResult.mediaQuery)
@@ -177,6 +143,7 @@ suspend fun Kord.mediaQueryModule(
 
                     is MediaResult.Error.Message -> {
                     }
+
                     is MediaResult.Error.NotFound -> {
                     }
                 }
@@ -210,10 +177,11 @@ suspend fun Kord.mediaQueryModule(
     }
 }
 
-fun MessageBuilder.with(media: Media, query: MediaQuery) {
-    embed(media)
-    actionRow(query)
-}
+val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
+    get() = {
+        embed(media)
+        actionRow(mediaQuery)
+    }
 
 fun MessageBuilder.embed(media: Media) {
     embed {
