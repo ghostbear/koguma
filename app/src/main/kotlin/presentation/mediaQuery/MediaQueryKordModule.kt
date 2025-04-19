@@ -1,5 +1,6 @@
 package me.ghostbear.koguma.presentation.mediaQuery
 
+import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -11,17 +12,21 @@ import dev.kord.core.entity.Message
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.core.on
 import dev.kord.rest.builder.interaction.string
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.embed
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
+import me.ghostbear.koguma.domain.mediaQuery.MediaFormat
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
+import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
 import me.ghostbear.koguma.domain.session.SessionStore
@@ -185,29 +190,81 @@ val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
 
 fun MessageBuilder.embed(media: Media) {
     embed {
+        url = media.url
         title = media.title
         description = media.description
-        thumbnail {
-            url = media.thumbnailUrl
+        color = media.color?.let { Color(it) }
+        media.thumbnailUrl?.let { thumbnailUrl ->
+            thumbnail {
+                url = thumbnailUrl
+            }
         }
-        field {
-            name = "Type"
-            value = media.type.name
-            inline = true
+        media.year?.let { year ->
+            field {
+                name = "Year"
+                value = "$year"
+                inline = true
+            }
         }
-        field {
-            name = "Year"
-            value = "${media.year}"
-            inline = true
+        media.season?.let { season ->
+            field {
+                name = "Season"
+                value = season.name
+                inline = true
+            }
         }
-        field {
-            name = "Mean Score"
-            value = "${media.meanScore}"
-            inline = true
+        media.meanScore?.let { meanScore ->
+            field {
+                name = "Mean Score"
+                value = "$meanScore"
+                inline = true
+            }
         }
-        field {
-            name = "Genres"
-            value = media.genres.joinToString(", ")
+        media.episodeCount?.let { episodeCount ->
+            field {
+                name = "Episodes"
+                value = "$episodeCount"
+                inline = true
+            }
+        }
+        media.chapterCount?.let { chapterCount ->
+            field {
+                name = "Chapters"
+                value = "$chapterCount"
+                inline = true
+            }
+        }
+        media.genres?.let { genres ->
+            field {
+                name = "Genres"
+                value = genres.joinToString(", ")
+            }
+        }
+        footer {
+            text = listOfNotNull(
+                when (media.format) {
+                    MediaFormat.TV -> "TV"
+                    MediaFormat.TV_SHORT -> "TV Short"
+                    MediaFormat.MOVIE -> "Movie"
+                    MediaFormat.SPECIAL -> "Special"
+                    MediaFormat.OVA -> "OVA"
+                    MediaFormat.ONA -> "ONA"
+                    MediaFormat.MUSIC -> "Music"
+                    MediaFormat.MANGA -> "Manga"
+                    MediaFormat.NOVEL -> "Novel"
+                    MediaFormat.ONE_SHOT -> "One-shot"
+                    null -> null
+                },
+                when (media.status) {
+                    MediaStatus.FINISHED -> "Finished"
+                    MediaStatus.RELEASING -> "Releasing"
+                    MediaStatus.NOT_YET_RELEASED -> "Not yet released"
+                    MediaStatus.CANCELLED -> "Cancelled"
+                    MediaStatus.HIATUS -> "Hiatus"
+                    null -> null
+                },
+                media.startDate?.format(LocalDate.Format { year(); char('/'); monthNumber(); char('/'); dayOfMonth() }),
+            ).joinToString(" - ")
         }
     }
 }
