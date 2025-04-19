@@ -1,10 +1,10 @@
 query SearchMedia(
   $query: String!
   $page: Int!,
-  $format_in: [MediaFormat]
-  $format_not_in: [MediaFormat]
+  $format_in: [MediaFormat!]
+  $format_not_in: [MediaFormat!]
 ) {
-  Page(
+  page: Page(
     page: $page,
     perPage: 1
   ) {

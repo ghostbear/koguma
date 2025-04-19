@@ -1,10 +1,9 @@
-import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.serialization)
-    alias(libs.plugins.graphql)
+    alias(libs.plugins.apollo)
     application
 }
 
@@ -35,7 +34,9 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.graphql.kotlin.ktor.client)
+    implementation(libs.apollo.runtime)
+    implementation(libs.apollo.normalized.cache)
+    implementation(libs.apollo.ktor.engine)
     testImplementation(libs.kotlin.test.junit5)
 }
 
@@ -44,10 +45,14 @@ application {
 }
 
 
-graphql {
-    client {
-        endpoint = "https://graphql.anilist.co/"
-        packageName = "com.example.generated"
-        serializer = GraphQLSerializer.KOTLINX
+apollo {
+    service("aniList") {
+        packageName.set("me.ghostbear.koguma.data.mediaQuery.aniList")
+        codegenModels.set("responseBased")
+
+        introspection {
+            endpointUrl.set("https://graphql.anilist.co/")
+            schemaFile.set(file("src/main/graphql/schema.graphqls"))
+        }
     }
 }

@@ -1,7 +1,9 @@
 package me.ghostbear.koguma
 
-import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
-import com.expediagroup.graphql.client.serialization.GraphQLClientKotlinxSerializer
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
+import com.apollographql.apollo.cache.normalized.normalizedCache
+import com.apollographql.ktor.http.KtorHttpEngine
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.RemovalCause
 import dev.kord.core.Kord
@@ -9,16 +11,15 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
-import java.net.URL
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
 import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
-import me.ghostbear.koguma.data.session.CaffeineSessionStore
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
+import me.ghostbear.koguma.data.session.CaffeineSessionStore
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.presentation.mediaQuery.ChannelIdAndMessageId
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
-
 
 suspend fun main(args: Array<String>) {
     val kord = Kord(args.firstOrNull() ?: error("Missing required argument 'token'"))
@@ -26,14 +27,15 @@ suspend fun main(args: Array<String>) {
     kord.mediaQueryModule(
         InterpreterMediaQueryMatcher(),
         AniListMediaDataSource(
-            GraphQLKtorClient(
-                url = URL("https://graphql.anilist.co/"),
-                serializer = GraphQLClientKotlinxSerializer()
-            )
+            ApolloClient.Builder()
+                .serverUrl("https://graphql.anilist.co/")
+                .httpEngine(KtorHttpEngine())
+                .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
+                .build()
         ),
         CaffeineSessionStore<ChannelIdAndMessageId, MediaQuery>(
             Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterWrite(5.minutes.toJavaDuration())
                 .maximumSize(32)
                 .removalListener<ChannelIdAndMessageId, MediaQuery> { id, session, cause ->
                     if (cause == RemovalCause.REPLACED) return@removalListener

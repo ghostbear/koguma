@@ -1,12 +1,13 @@
 package me.ghostbear.koguma.data.mediaQuery
 
-import com.example.generated.enums.MediaFormat
-import com.example.generated.searchmedia.Media as DataMedia
+import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
+import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
+import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaType
 import me.ghostbear.koguma.domain.mediaQuery.Media as DomainMedia
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.MediaType as DomainMediaType
 
 class AniListMedia(
-    val media: DataMedia
+    val media: SearchMediaQuery.Data.Page.Medium
 ) : DomainMedia {
 
     override val id: Long
@@ -19,11 +20,11 @@ class AniListMedia(
         get() = media.description ?: "No description"
     override val thumbnailUrl: String
         get() = media.coverImage?.extraLarge ?: media.coverImage?.large ?: media.coverImage?.medium ?: "https://placehold.co/500x700?text=?"
-    override val type: MediaType
-        get() = when (media.type ?: com.example.generated.enums.MediaType.__UNKNOWN_VALUE) {
-            com.example.generated.enums.MediaType.ANIME -> MediaType.ANIME
-            com.example.generated.enums.MediaType.MANGA -> if (media.format == MediaFormat.MANGA) MediaType.MANGA else MediaType.NOVEL
-            com.example.generated.enums.MediaType.__UNKNOWN_VALUE -> throw IllegalArgumentException("Unknown media type")
+    override val type: DomainMediaType
+        get() = when (media.type ?: MediaType.UNKNOWN__) {
+            MediaType.ANIME -> DomainMediaType.ANIME
+            MediaType.MANGA -> if (media.format == MediaFormat.MANGA) DomainMediaType.MANGA else DomainMediaType.NOVEL
+            MediaType.UNKNOWN__ -> throw IllegalArgumentException("Unknown media type")
         }
     override val year: Int
         get() = media.seasonYear ?: -1

@@ -12,7 +12,8 @@ ktor = "3.1.2"
 caffeine = "3.2.0"
 uri = "0.0.19"
 logback = "1.5.18"
-expedia-graphql = "8.6.0"
+apollo = "4.1.1"
+apollo-ktor-engine = "0.1.1"
 
 [libraries]
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -30,7 +31,9 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
-graphql-kotlin-ktor-client = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "expedia-graphql" }
+apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollo" }
+apollo-normalized-cache = { module = "com.apollographql.apollo:apollo-normalized-cache", version.ref = "apollo" }
+apollo-ktor-engine = { module = "com.apollographql.ktor:apollo-engine-ktor", version.ref = "apollo-ktor-engine" }
 
 [bundles]
 kotlinx = ["kotlinx-datetime", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
@@ -38,4 +41,4 @@ kotlinx = ["kotlinx-datetime", "kotlinx-serialization-json", "kotlinx-coroutines
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-graphql = { id = "com.expediagroup.graphql", version.ref = "expedia-graphql" }
+apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }

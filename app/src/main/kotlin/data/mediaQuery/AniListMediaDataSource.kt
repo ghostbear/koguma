@@ -1,14 +1,15 @@
 package me.ghostbear.koguma.data.mediaQuery
 
-import com.example.generated.SearchMedia
-import com.example.generated.enums.MediaFormat
-import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Optional
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
+import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
@@ -16,7 +17,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 
 class AniListMediaDataSource(
-    val client: GraphQLKtorClient,
+    val apolloClient: ApolloClient,
 ) : MediaDataSource {
     override suspend fun query(mediaQuery: MediaQuery): MediaResult<Media> {
         val response = _query(mediaQuery)
@@ -25,7 +26,7 @@ class AniListMediaDataSource(
             return MediaResult.Error.Message(response.errors!!.joinToString(separator = ",") { it.message }, mediaQuery)
         }
 
-        val page = response.data?.Page
+        val page = response.data?.page
         if (page == null) {
             return MediaResult.Error.Message("Missing page", mediaQuery)
         }
@@ -53,27 +54,27 @@ class AniListMediaDataSource(
         }
     }
 
-    internal suspend fun _query(mediaQuery: MediaQuery): GraphQLClientResponse<SearchMedia.Result> {
-        val formatIn = when (mediaQuery.type) {
+    internal suspend fun _query(mediaQuery: MediaQuery): ApolloResponse<SearchMediaQuery.Data> {
+        val formatIn: List<MediaFormat>? = when (mediaQuery.type) {
             MediaType.ANIME -> null
             MediaType.MANGA -> listOf(MediaFormat.MANGA, MediaFormat.ONE_SHOT)
             MediaType.NOVEL -> listOf(MediaFormat.NOVEL)
         }
 
-        val formatNotIn = when (mediaQuery.type) {
+        val formatNotIn: List<MediaFormat>? = when (mediaQuery.type) {
             MediaType.ANIME -> listOf(MediaFormat.MANGA, MediaFormat.ONE_SHOT, MediaFormat.NOVEL)
             MediaType.MANGA -> null
             MediaType.NOVEL -> null
         }
 
-        val variables = SearchMedia.Variables(
+        val query = SearchMediaQuery(
             query = mediaQuery.query,
             page = mediaQuery.currentPage,
-            format_in = formatIn,
-            format_not_in = formatNotIn,
+            format_in = Optional.presentIfNotNull(formatIn),
+            format_not_in = Optional.presentIfNotNull(formatNotIn),
         )
 
-        return client.execute(SearchMedia(variables))
+        return apolloClient.query(query).execute()
     }
 
 }
