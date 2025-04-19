@@ -15,9 +15,8 @@ import kotlinx.coroutines.launch
 import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.data.session.CaffeineSessionStore
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.presentation.mediaQuery.MediaQuerySession
-import me.ghostbear.koguma.presentation.mediaQuery.MediaQuerySessionId
+import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
+import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
 
 suspend fun main(args: Array<String>) {
@@ -32,20 +31,20 @@ suspend fun main(args: Array<String>) {
                 .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
                 .build()
         ),
-        CaffeineSessionStore<MediaQuerySessionId, MediaQuerySession>(
+        CaffeineSessionStore<DiscordMessageReference, DiscordSession>(
             Caffeine.newBuilder()
                 .expireAfterWrite(5.minutes.toJavaDuration())
                 .maximumSize(32)
-                .removalListener<MediaQuerySessionId, MediaQuerySession> { id, _, cause ->
+                .removalListener<DiscordMessageReference, DiscordSession> { id, _, cause ->
                     if (cause == RemovalCause.REPLACED) return@removalListener
                     kord.launch {
-                        val (channelId, messageId) = id!!
+                        val (messageId, channelId) = id!!
                         kord.rest.channel.editMessage(channelId, messageId) {
                             components = mutableListOf()
                         }
                     }
                 }
-                .build<MediaQuerySessionId, MediaQuerySession>()
+                .build<DiscordMessageReference, DiscordSession>()
         )
     )
 
