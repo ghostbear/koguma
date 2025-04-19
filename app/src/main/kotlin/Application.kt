@@ -7,8 +7,6 @@ import com.apollographql.ktor.http.KtorHttpEngine
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.RemovalCause
 import dev.kord.core.Kord
-import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlin.time.Duration.Companion.minutes
@@ -49,11 +47,6 @@ suspend fun main(args: Array<String>) {
                 .build<ChannelIdAndMessageId, MediaQuery>()
         )
     )
-
-    kord.on<MessageCreateEvent> {
-        if (message.author?.isBot == true) return@on
-        if (message.content == "!ping") message.channel.createMessage("Pong!")
-    }
 
     kord.login {
         @OptIn(PrivilegedIntent::class)
