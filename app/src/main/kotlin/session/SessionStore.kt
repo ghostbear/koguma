@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.session
+package me.ghostbear.koguma.session
 
 interface SessionStore<K, V> {
 

@@ -1,7 +1,6 @@
-package me.ghostbear.koguma.data.session
+package me.ghostbear.koguma.session
 
 import com.github.benmanes.caffeine.cache.Cache
-import me.ghostbear.koguma.domain.session.SessionStore
 
 class CaffeineSessionStore<K : Any, V : Any>(
     val cache: Cache<K, V>

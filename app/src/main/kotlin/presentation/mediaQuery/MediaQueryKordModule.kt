@@ -30,7 +30,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
-import me.ghostbear.koguma.domain.session.SessionStore
+import me.ghostbear.koguma.session.SessionStore
 import me.ghostbear.koguma.ext.takeIf
 
 suspend fun Kord.mediaQueryModule(
