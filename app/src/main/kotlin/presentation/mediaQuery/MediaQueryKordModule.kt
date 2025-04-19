@@ -4,15 +4,18 @@ import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
+import dev.kord.core.behavior.MessageBehavior
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.interaction.updatePublicMessage
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Message
+import dev.kord.core.event.Event
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.core.on
 import dev.kord.rest.builder.interaction.string
 import dev.kord.rest.builder.message.MessageBuilder
@@ -32,19 +35,25 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
 import me.ghostbear.koguma.domain.session.SessionStore
 
-data class ChannelIdAndMessageId(
+data class MediaQuerySessionId(
     val channelId: Snowflake,
     val messageId: Snowflake,
 )
 
-fun Message.toSessionId(): ChannelIdAndMessageId {
-    return ChannelIdAndMessageId(
+data class MediaQuerySession(
+    val mediaQuery: MediaQuery,
+    val replyMessageId: Snowflake? = null,
+    val replyChannelId: Snowflake? = null
+)
+
+fun MessageBehavior.toSessionId(): MediaQuerySessionId {
+    return MediaQuerySessionId(
         channelId = channelId,
         messageId = id
     )
 }
 
-typealias MediaQuerySessionStore = SessionStore<ChannelIdAndMessageId, MediaQuery>
+typealias MediaQuerySessionStore = SessionStore<MediaQuerySessionId, MediaQuerySession>
 
 suspend fun Kord.mediaQueryModule(
     matcher: MediaQueryMatcher,
@@ -84,7 +93,7 @@ suspend fun Kord.mediaQueryModule(
             when (result) {
                 is MediaResult.Success -> {
                     val message = deferredResponse.respond(result.messageBuilder)
-                    sessionStore.put(message.message.toSessionId(), result.mediaQuery)
+                    sessionStore.put(message.message.toSessionId(), MediaQuerySession(result.mediaQuery))
                 }
 
                 is MediaResult.Error.Message -> deferredResponse.delete()
@@ -105,7 +114,8 @@ suspend fun Kord.mediaQueryModule(
             }
 
             val direction = if (componentId == "next") 1 else -1
-            val query = sessionOrNull.copy(currentPage = sessionOrNull.currentPage + direction)
+            val mediaQuery = sessionOrNull.mediaQuery
+            val query = mediaQuery.copy(currentPage = mediaQuery.currentPage + direction)
 
             val result = dataSource.query(query)
             when (result) {
@@ -113,7 +123,7 @@ suspend fun Kord.mediaQueryModule(
                 is MediaResult.Error.NotFound -> {}
                 is MediaResult.Success -> {
                     interaction.updatePublicMessage(result.messageBuilder)
-                    sessionStore.put(sessionId, result.mediaQuery)
+                    sessionStore.put(sessionId, MediaQuerySession(result.mediaQuery))
                 }
             }
         }
@@ -149,7 +159,14 @@ suspend fun Kord.mediaQueryModule(
                             mediaResult.messageBuilder(this)
                         }
 
-                        sessionStore.put(reply.toSessionId(), mediaResult.mediaQuery)
+                        sessionStore.put(
+                            message.toSessionId(),
+                            MediaQuerySession(
+                                mediaResult.mediaQuery,
+                                reply.id,
+                                reply.channelId,
+                            )
+                        )
                     }
 
                     is MediaResult.Error.Message -> {
@@ -184,6 +201,142 @@ suspend fun Kord.mediaQueryModule(
                     }
                 }
             }
+        }
+    }
+
+    on<MessageUpdateEvent> {
+        val sessionId = message.toSessionId()
+        val session = sessionStore.getOrNull(sessionId)
+        val match = matcher.match(message.asMessage().content)
+        val mediaResult = dataSource.query(*match.matches.map { MediaQuery(it.query, it.type) }.toTypedArray())
+
+        if (mediaResult.isEmpty()) {
+
+            if (session != null && session.replyChannelId != null && session.replyMessageId != null) {
+                rest.channel.deleteMessage(session.replyChannelId, session.replyMessageId)
+            }
+
+            return@on
+        }
+
+        if (session != null && session.replyChannelId != null && session.replyMessageId != null) {
+
+            rest.channel.editMessage(session.replyChannelId, session.replyMessageId) {
+                allowedMentions {
+                    repliedUser = false
+                }
+                if (mediaResult.size == 1) {
+                    val mediaResult = mediaResult.first()
+                    when (mediaResult) {
+                        is MediaResult.Success -> {
+                            val reply = message.reply {
+                                allowedMentions {
+                                    repliedUser = false
+                                }
+                                mediaResult.messageBuilder(this)
+                            }
+
+                            sessionStore.put(
+                                message.toSessionId(),
+                                MediaQuerySession(
+                                    mediaResult.mediaQuery,
+                                    reply.id,
+                                    reply.channelId,
+                                )
+                            )
+                        }
+
+                        is MediaResult.Error.Message -> {
+                        }
+
+                        is MediaResult.Error.NotFound -> {
+                        }
+                    }
+                    return@editMessage
+                }
+
+                message.reply {
+                    allowedMentions {
+                        repliedUser = false
+                    }
+                    content = buildString {
+                        mediaResult.filterIsInstance<MediaResult.Success>()
+                            .forEach { append("- [${it.media.title}](<${it.media.url}>)\n") }
+
+                        val notFound = mediaResult.filterIsInstance<MediaResult.Error.NotFound>()
+                        if (notFound.isNotEmpty()) {
+                            append("Could not find\n")
+                            notFound.forEach { append("- ${it.mediaQuery.query}\n") }
+                        }
+
+                        val errorMessages = mediaResult.filterIsInstance<MediaResult.Error.Message>()
+                        if (errorMessages.isNotEmpty()) {
+                            append("Could not retrieve\n")
+                            errorMessages.forEach { append("- ${it.mediaQuery.query}\n") }
+                        }
+                    }
+                }
+
+            }
+            return@on
+        }
+
+        message.reply {
+            allowedMentions {
+                repliedUser = false
+            }
+            if (mediaResult.size == 1) {
+                val mediaResult = mediaResult.first()
+                when (mediaResult) {
+                    is MediaResult.Success -> {
+                        val reply = message.reply {
+                            allowedMentions {
+                                repliedUser = false
+                            }
+                            mediaResult.messageBuilder(this)
+                        }
+
+                        sessionStore.put(
+                            message.toSessionId(),
+                            MediaQuerySession(
+                                mediaResult.mediaQuery,
+                                reply.id,
+                                reply.channelId,
+                            )
+                        )
+                    }
+
+                    is MediaResult.Error.Message -> {
+                    }
+
+                    is MediaResult.Error.NotFound -> {
+                    }
+                }
+                return@reply
+            }
+
+            message.reply {
+                allowedMentions {
+                    repliedUser = false
+                }
+                content = buildString {
+                    mediaResult.filterIsInstance<MediaResult.Success>()
+                        .forEach { append("- [${it.media.title}](<${it.media.url}>)\n") }
+
+                    val notFound = mediaResult.filterIsInstance<MediaResult.Error.NotFound>()
+                    if (notFound.isNotEmpty()) {
+                        append("Could not find\n")
+                        notFound.forEach { append("- ${it.mediaQuery.query}\n") }
+                    }
+
+                    val errorMessages = mediaResult.filterIsInstance<MediaResult.Error.Message>()
+                    if (errorMessages.isNotEmpty()) {
+                        append("Could not retrieve\n")
+                        errorMessages.forEach { append("- ${it.mediaQuery.query}\n") }
+                    }
+                }
+            }
+
         }
     }
 }

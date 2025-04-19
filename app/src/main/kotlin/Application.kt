@@ -16,7 +16,8 @@ import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.data.session.CaffeineSessionStore
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.presentation.mediaQuery.ChannelIdAndMessageId
+import me.ghostbear.koguma.presentation.mediaQuery.MediaQuerySession
+import me.ghostbear.koguma.presentation.mediaQuery.MediaQuerySessionId
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
 
 suspend fun main(args: Array<String>) {
@@ -31,11 +32,11 @@ suspend fun main(args: Array<String>) {
                 .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
                 .build()
         ),
-        CaffeineSessionStore<ChannelIdAndMessageId, MediaQuery>(
+        CaffeineSessionStore<MediaQuerySessionId, MediaQuerySession>(
             Caffeine.newBuilder()
                 .expireAfterWrite(5.minutes.toJavaDuration())
                 .maximumSize(32)
-                .removalListener<ChannelIdAndMessageId, MediaQuery> { id, session, cause ->
+                .removalListener<MediaQuerySessionId, MediaQuerySession> { id, _, cause ->
                     if (cause == RemovalCause.REPLACED) return@removalListener
                     kord.launch {
                         val (channelId, messageId) = id!!
@@ -44,7 +45,7 @@ suspend fun main(args: Array<String>) {
                         }
                     }
                 }
-                .build<ChannelIdAndMessageId, MediaQuery>()
+                .build<MediaQuerySessionId, MediaQuerySession>()
         )
     )
 
