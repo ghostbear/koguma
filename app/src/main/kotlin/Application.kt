@@ -9,15 +9,19 @@ import com.github.benmanes.caffeine.cache.RemovalCause
 import dev.kord.core.Kord
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
 import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
-import me.ghostbear.koguma.session.CaffeineSessionStore
-import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
+import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
+import me.ghostbear.koguma.session.CaffeineSessionStore
 
 suspend fun main(args: Array<String>) {
     val kord = Kord(args.firstOrNull() ?: error("Missing required argument 'token'"))
@@ -27,7 +31,17 @@ suspend fun main(args: Array<String>) {
         AniListMediaDataSource(
             ApolloClient.Builder()
                 .serverUrl("https://graphql.anilist.co/")
-                .httpEngine(KtorHttpEngine())
+                .httpEngine(
+                    KtorHttpEngine(
+                        HttpClient {
+                            expectSuccess = false
+                            install(HttpTimeout) {
+                                connectTimeoutMillis = 1.minutes.inWholeMilliseconds
+                                requestTimeoutMillis = 1.minutes.inWholeMilliseconds
+                            }
+                        }
+                    )
+                )
                 .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
                 .build()
         ),

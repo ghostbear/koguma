@@ -67,11 +67,14 @@ class AniListMediaDataSource(
             MediaType.NOVEL -> null
         }
 
+        val genresNotIn  = listOf("Hentai", "Ecchi").takeUnless { mediaQuery.allowNsfw }
+
         val query = SearchMediaQuery(
             query = mediaQuery.query,
             page = mediaQuery.currentPage,
             format_in = Optional.presentIfNotNull(formatIn),
             format_not_in = Optional.presentIfNotNull(formatNotIn),
+            genres_not_in = Optional.presentIfNotNull(genresNotIn)
         )
 
         return apolloClient.query(query).execute()

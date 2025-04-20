@@ -30,8 +30,9 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
-import me.ghostbear.koguma.session.SessionStore
+import me.ghostbear.koguma.ext.nsfw
 import me.ghostbear.koguma.ext.takeIf
+import me.ghostbear.koguma.session.SessionStore
 
 suspend fun Kord.mediaQueryModule(
     matcher: MediaQueryMatcher,
@@ -67,7 +68,8 @@ suspend fun Kord.mediaQueryModule(
                 else -> throw IllegalArgumentException("Unknown type of command")
             }
 
-            val result = dataSource.query(MediaQuery(query, type))
+            val channel = interaction.channel.asChannel()
+            val result = dataSource.query(MediaQuery(query, type, channel.nsfw))
             when (result) {
                 is MediaResult.Success -> {
                     val message = deferredResponse.respond(result.messageBuilder)
@@ -85,11 +87,12 @@ suspend fun Kord.mediaQueryModule(
 
         if (componentId == "next" || componentId == "previous") {
             val sessionId = interaction.message.reference()
-            val sessionOrNull = sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Interaction>() ?: return@on.also {
-                interaction.updatePublicMessage {
-                    components = mutableListOf()
+            val sessionOrNull =
+                sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Interaction>() ?: return@on.also {
+                    interaction.updatePublicMessage {
+                        components = mutableListOf()
+                    }
                 }
-            }
 
             val direction = if (componentId == "next") 1 else -1
             val mediaQuery = sessionOrNull.mediaQuery
@@ -112,7 +115,7 @@ suspend fun Kord.mediaQueryModule(
         }
     }
 
-    val process: suspend (Message) -> Unit  = process@{ message ->
+    val process: suspend (Message) -> Unit = process@{ message ->
         val sessionId = message.reference()
         val activeSessionOrNull = sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Message>()
 
@@ -139,6 +142,7 @@ suspend fun Kord.mediaQueryModule(
                         }
                         result.messageBuilder(this)
                     }
+
                     is MediaResult.Error.Message -> {
                     }
 
@@ -167,7 +171,8 @@ suspend fun Kord.mediaQueryModule(
         }
 
         message.channel.withTyping {
-            val queries = matches.map { MediaQuery(it.query, it.type) }.toTypedArray()
+            val channel = asChannel()
+            val queries = matches.map { MediaQuery(it.query, it.type, channel.nsfw) }.toTypedArray()
 
             val results = dataSource.query(*queries)
 

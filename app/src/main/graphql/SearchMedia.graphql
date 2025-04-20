@@ -1,8 +1,9 @@
 query SearchMedia(
   $query: String!
   $page: Int!,
-  $format_in: [MediaFormat!]
-  $format_not_in: [MediaFormat!]
+  $format_in: [MediaFormat!],
+  $format_not_in: [MediaFormat!],
+  $genres_not_in: [String!]
 ) {
   page: Page(
     page: $page,
@@ -14,10 +15,12 @@ query SearchMedia(
     }
     media(
       format_not_in: $format_not_in
-      format_in: $format_in
+      format_in: $format_in,
+      genre_not_in: $genres_not_in,
       search: $query
     ) {
       id
+      isAdult
       siteUrl
       type
       format
