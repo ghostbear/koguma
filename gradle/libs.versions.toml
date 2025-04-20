@@ -11,6 +11,7 @@ kord = "0.15.0"
 ktor = "3.1.2"
 caffeine = "3.2.0"
 uri = "0.0.19"
+config = "1.4.3"
 logback = "1.5.18"
 apollo = "4.1.1"
 apollo-ktor-engine = "0.1.1"
@@ -32,6 +33,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
+config = { module = "com.typesafe:config", version.ref = "config" }
 apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollo" }
 apollo-normalized-cache = { module = "com.apollographql.apollo:apollo-normalized-cache", version.ref = "apollo" }
 apollo-ktor-engine = { module = "com.apollographql.ktor:apollo-engine-ktor", version.ref = "apollo-ktor-engine" }

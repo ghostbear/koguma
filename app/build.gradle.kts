@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.kord.core)
     implementation(libs.logback.classic)
     implementation(libs.caffeine)
+    implementation(libs.config)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.logging)

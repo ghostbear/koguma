@@ -6,25 +6,29 @@ import com.apollographql.apollo.cache.normalized.normalizedCache
 import com.apollographql.ktor.http.KtorHttpEngine
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.RemovalCause
+import com.typesafe.config.ConfigFactory
 import dev.kord.core.Kord
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
 import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
+import me.ghostbear.koguma.ext.safely
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
 import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
 import me.ghostbear.koguma.session.CaffeineSessionStore
 
-suspend fun main(args: Array<String>) {
-    val kord = Kord(args.firstOrNull() ?: error("Missing required argument 'token'"))
+suspend fun main() {
+    val root = ConfigFactory.load()
+    val config = root.safely { getConfig("koguma") } ?: throw IllegalStateException("Missing configuration: path $.koguma")
+    val token: String = config.safely { getString("token") } ?: error("Missing required configuration '$.koguma.token'")
+
+    val kord = Kord(token)
 
     kord.mediaQueryModule(
         InterpreterMediaQueryMatcher(),
