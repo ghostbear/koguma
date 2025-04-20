@@ -86,16 +86,19 @@ suspend fun Kord.mediaQueryModule(
         val componentId = interaction.componentId
 
         if (componentId == "next" || componentId == "previous") {
-            val sessionId = interaction.message.reference()
+            val sessionId = interaction.message.messageReference?.reference() ?: interaction.message.reference()
             val sessionOrNull =
-                sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Interaction>() ?: return@on.also {
+                sessionStore.getOrNull(sessionId) ?: return@on.also {
                     interaction.updatePublicMessage {
                         components = mutableListOf()
                     }
                 }
 
             val direction = if (componentId == "next") 1 else -1
-            val mediaQuery = sessionOrNull.mediaQuery
+            val mediaQuery = when (sessionOrNull) {
+                is DiscordSession.Interaction -> sessionOrNull.mediaQuery
+                is DiscordSession.Message -> sessionOrNull.mediaQuery.first()
+            }
             val query = mediaQuery.copy(currentPage = mediaQuery.currentPage + direction)
 
             val result = dataSource.query(query)
