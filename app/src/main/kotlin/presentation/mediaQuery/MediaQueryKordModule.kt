@@ -175,7 +175,7 @@ suspend fun Kord.mediaQueryModule(
 
         message.channel.withTyping {
             val channel = asChannel()
-            val queries = matches.map { MediaQuery(it.query, it.type, channel.nsfw) }.toTypedArray()
+            val queries = matches.map { MediaQuery(it.query, it.type, channel.nsfw, it.page) }.toTypedArray()
 
             val results = dataSource.query(*queries)
 

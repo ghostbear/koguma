@@ -1,74 +1,63 @@
 package me.ghostbear.koguma.data.mediaQueryParser
 
-data class Group(val leftType: TokenType, val literals: List<Any?>, val rightType: TokenType)
+interface Expr {
+    data class Group(val leftType: TokenType, val literals: List<Literal?>, val rightType: TokenType) : Expr
+    data class Index(val literal: Literal?) : Expr
+    data class Binary(val left: Expr, val right: Expr) : Expr
+    data class Literal(val literal: Any?) : Expr
+}
+
+fun TokenType.opposite(): TokenType {
+    return when (this) {
+        TokenType.LEFT_DOUBLE_BRACES ->  TokenType.RIGHT_DOUBLE_BRACES
+        TokenType.RIGHT_DOUBLE_BRACES ->  TokenType.EOF
+        TokenType.LEFT_BRACKETS ->  TokenType.RIGHT_BRACKETS
+        TokenType.LEFT_DOUBLE_BRACKETS ->  TokenType.RIGHT_DOUBLE_BRACKETS
+        TokenType.RIGHT_BRACKETS ->  TokenType.EOF
+        TokenType.RIGHT_DOUBLE_BRACKETS ->  TokenType.EOF
+        TokenType.DOUBLE_LESSER_THAN ->  TokenType.DOUBLE_GREATER_THAN
+        TokenType.DOUBLE_GREATER_THAN ->  TokenType.EOF
+        TokenType.STRING ->  TokenType.EOF
+        TokenType.NUMBER ->  TokenType.EOF
+        TokenType.EOF ->  TokenType.EOF
+    }
+}
 
 class Parser(val tokens: List<Token>) {
     private var current = 0
 
-    fun groups(): List<Group> {
-        val groups = mutableListOf<Group>()
+    fun expression(): List<Expr> {
+        val exprs = mutableListOf<Expr>()
         while (!isAtEnd()) {
-            val advance = advance()
+            if (!match(TokenType.DOUBLE_LESSER_THAN, TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACES)) {
+                advance()
+                continue
+            }
+            val start = previous()
 
-            if (advance.type == TokenType.DOUBLE_LESSER_THAN) {
-                val literals = mutableListOf<Any?>()
-                while (!check(TokenType.DOUBLE_GREATER_THAN) && !isAtEnd()) {
-                    literals.addAll(sentence().also { if (it.isEmpty()) advance() })
+            val literals = mutableListOf<Expr.Literal?>()
+            while (!match(start.type.opposite())) {
+                val literal = advance()
+                literals.add(Expr.Literal(literal.literal))
+            }
+            val end = previous()
+
+            val group = Expr.Group(start.type, literals, end.type)
+
+            var index: Expr.Index? = null
+            val optionalStart = peek()
+            if (optionalStart.type == TokenType.LEFT_BRACKETS) {
+                advance()
+                if (peek().type == TokenType.NUMBER) {
+                    val number = advance()
+                    index = Expr.Index(Expr.Literal(number.literal))
                 }
-                if (check(TokenType.DOUBLE_GREATER_THAN)) {
-                    groups.add(
-                        Group(
-                            advance.type,
-                            literals,
-                            advance().type
-                        )
-                    )
-                }
+                while (!match(optionalStart.type.opposite())) {}
             }
 
-            if (advance.type == TokenType.LEFT_DOUBLE_BRACKETS) {
-                val literals = mutableListOf<Any?>()
-                while (!check(TokenType.RIGHT_DOUBLE_BRACKETS) && !isAtEnd()) {
-                    literals.addAll(sentence().also { if (it.isEmpty()) advance() })
-                }
-                if (check(TokenType.RIGHT_DOUBLE_BRACKETS)) {
-                    groups.add(
-                        Group(
-                            advance.type,
-                            literals,
-                            advance().type
-                        )
-                    )
-                }
-            }
-
-            if (advance.type == TokenType.LEFT_DOUBLE_BRACES) {
-                val literals = mutableListOf<Any?>()
-                while (!check(TokenType.RIGHT_DOUBLE_BRACES) && !isAtEnd()) {
-                    literals.addAll(sentence().also { if (it.isEmpty()) advance() })
-                }
-                if (check(TokenType.RIGHT_DOUBLE_BRACES)) {
-                    groups.add(
-                        Group(
-                            advance.type,
-                            literals,
-                            advance().type
-                        )
-                    )
-                }
-            }
-
-
+            exprs.add(index?.let { Expr.Binary(group, it) } ?: group)
         }
-        return groups
-    }
-
-    fun sentence(): MutableList<Any?> {
-        val literals = mutableListOf<Any?>()
-        while (match(TokenType.STRING, TokenType.NUMBER)) {
-            literals.add(previous().literal)
-        }
-        return literals
+        return exprs
     }
 
     fun match(vararg types: TokenType): Boolean {
