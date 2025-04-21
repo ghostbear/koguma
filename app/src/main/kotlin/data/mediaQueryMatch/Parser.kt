@@ -26,8 +26,8 @@ fun TokenType.opposite(): TokenType {
 class Parser(val tokens: List<Token>) {
     private var current = 0
 
-    fun expression(): List<Expr> {
-        val exprs = mutableListOf<Expr>()
+    fun expression(): List<Expr>  {
+        val expressions = mutableListOf<Expr>()
         while (!isAtEnd()) {
             if (!match(TokenType.DOUBLE_LESSER_THAN, TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACES)) {
                 advance()
@@ -55,9 +55,9 @@ class Parser(val tokens: List<Token>) {
                 while (!match(optionalStart.type.opposite())) {}
             }
 
-            exprs.add(index?.let { Expr.Binary(group, it) } ?: group)
+            expressions.add(index?.let { Expr.Binary(group, it) } ?: group)
         }
-        return exprs
+        return expressions
     }
 
     fun match(vararg types: TokenType): Boolean {

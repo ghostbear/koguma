@@ -3,6 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.sentry.jvm)
     alias(libs.plugins.apollo)
     application
 }
@@ -40,6 +41,18 @@ dependencies {
     implementation(libs.apollo.normalized.cache)
     implementation(libs.apollo.ktor.engine)
     testImplementation(libs.kotlin.test.junit5)
+}
+
+sentry {
+    includeSourceContext = true
+    includeDependenciesReport = true
+    autoInstallation {
+        enabled = true
+    }
+}
+
+tasks.named("generateSentryBundleIdJava") {
+    mustRunAfter(tasks.named("generateAniListApolloSources"))
 }
 
 application {

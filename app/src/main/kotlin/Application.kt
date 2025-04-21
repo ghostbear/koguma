@@ -12,6 +12,7 @@ import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.sentry.Sentry
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
@@ -25,11 +26,17 @@ import me.ghostbear.koguma.session.CaffeineSessionStore
 
 suspend fun main() {
     val root = ConfigFactory.load()
-    val config = root.safely { getConfig("koguma") } ?: throw IllegalStateException("Missing configuration: path $.koguma")
+
+    Sentry.init { options ->
+        options.isEnabled = false
+        options.isEnableExternalConfiguration = true
+        options.isSendDefaultPii = true
+    }
+
+    val config = root.safely { getConfig("koguma") } ?: throw IllegalStateException("Missing configuration '$.koguma'")
     val token: String = config.safely { getString("token") } ?: error("Missing required configuration '$.koguma.token'")
 
     val kord = Kord(token)
-
     kord.mediaQueryModule(
         InterpreterMediaQueryMatcher(),
         AniListMediaDataSource(
@@ -67,6 +74,9 @@ suspend fun main() {
     )
 
     kord.login {
+        presence {
+            watching("anime")
+        }
         @OptIn(PrivilegedIntent::class)
         intents += Intent.MessageContent
     }
