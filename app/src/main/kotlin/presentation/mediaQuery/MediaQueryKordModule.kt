@@ -241,6 +241,26 @@ fun MessageBuilder.embed(media: Media) {
                 url = thumbnailUrl
             }
         }
+        media.episodeCount?.let { episodeCount ->
+            field {
+                name = "Episodes"
+                value = "$episodeCount"
+                inline = true
+            }
+        }
+        media.chapterCount?.let { chapterCount ->
+            field {
+                name = "Chapters"
+                value = "$chapterCount"
+                inline = true
+            }
+        }
+        media.genres?.let { genres ->
+            field {
+                name = "Genres"
+                value = genres.joinToString(", ")
+            }
+        }
         media.year?.let { year ->
             field {
                 name = "Year"
@@ -260,26 +280,6 @@ fun MessageBuilder.embed(media: Media) {
                 name = "Mean Score"
                 value = "$meanScore"
                 inline = true
-            }
-        }
-        media.episodeCount?.let { episodeCount ->
-            field {
-                name = "Episodes"
-                value = "$episodeCount"
-                inline = true
-            }
-        }
-        media.chapterCount?.let { chapterCount ->
-            field {
-                name = "Chapters"
-                value = "$chapterCount"
-                inline = true
-            }
-        }
-        media.genres?.let { genres ->
-            field {
-                name = "Genres"
-                value = genres.joinToString(", ")
             }
         }
         footer {
