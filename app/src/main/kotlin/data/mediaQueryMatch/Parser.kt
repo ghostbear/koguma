@@ -42,20 +42,19 @@ class Parser(val tokens: List<Token>) {
             }
             val end = previous()
 
-            val group = Expr.Group(start.type, literals, end.type)
+            var expr: Expr = Expr.Group(start.type, literals, end.type)
 
-            var index: Expr.Index? = null
             val optionalStart = peek()
             if (optionalStart.type == TokenType.LEFT_BRACKETS) {
                 advance()
                 if (peek().type == TokenType.NUMBER) {
                     val number = advance()
-                    index = Expr.Index(Expr.Literal(number.literal))
+                    expr = Expr.Binary(expr, Expr.Index(Expr.Literal(number.literal)))
                 }
                 while (!match(optionalStart.type.opposite())) {}
             }
 
-            expressions.add(index?.let { Expr.Binary(group, it) } ?: group)
+            expressions.add(expr)
         }
         return expressions
     }
