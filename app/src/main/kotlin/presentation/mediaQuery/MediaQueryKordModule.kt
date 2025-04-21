@@ -41,7 +41,7 @@ suspend fun Kord.mediaQueryModule(
 ) {
 
     createGlobalChatInputCommand(
-        "ani-search",
+        "search",
         "Search for an anime, manga, or light novels",
     ) {
         string("query", "Search query") {
@@ -58,7 +58,7 @@ suspend fun Kord.mediaQueryModule(
     on<ChatInputCommandInteractionCreateEvent> {
         val command = interaction.command
 
-        if (command.rootName == "ani-search") {
+        if (command.rootName == "search") {
             val deferredResponse = interaction.deferPublicResponse()
             val query = command.strings["query"]!!
             val type = when (command.strings["type"]!!) {
