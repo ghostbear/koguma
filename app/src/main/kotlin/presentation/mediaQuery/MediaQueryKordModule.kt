@@ -236,10 +236,9 @@ fun MessageBuilder.embed(media: Media) {
         title = media.title
         description = media.description?.ellipsisIfNeeded(64)
         color = media.color?.let { Color(it) }
-        media.thumbnailUrl?.let { thumbnailUrl ->
-            thumbnail {
-                url = thumbnailUrl
-            }
+        when {
+            media.imageUrl != null -> image = media.imageUrl
+            media.thumbnailUrl != null -> thumbnail { url = media.thumbnailUrl!! }
         }
         media.episodeCount?.let { episodeCount ->
             field {

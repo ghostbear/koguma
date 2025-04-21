@@ -8,6 +8,7 @@ interface Media {
     val title: String
     val description: String?
     val thumbnailUrl: String?
+    val imageUrl: String?
     val type: MediaType?
     val format: MediaFormat?
     val status: MediaStatus?

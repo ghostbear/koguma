@@ -27,6 +27,8 @@ class AniListMedia(
             ?.replace("</?i>".toRegex(), "*")
     override val thumbnailUrl: String?
         get() = media.coverImage?.extraLarge ?: media.coverImage?.large ?: media.coverImage?.medium
+    override val imageUrl: String?
+        get() = media.bannerImage
     override val type: DomainMediaType?
         get() = when (media.type) {
             MediaType.ANIME -> DomainMediaType.ANIME

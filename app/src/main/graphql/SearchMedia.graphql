@@ -34,6 +34,7 @@ query SearchMedia(
         medium
         color
       }
+      bannerImage
       seasonYear
       season
       startDate {
