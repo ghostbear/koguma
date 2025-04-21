@@ -23,7 +23,8 @@ class AniListMedia(
     override val title: String
         get() = media.title?.userPreferred ?: "Untitled"
     override val description: String?
-        get() = media.description?.replace("</?br>".toRegex(), "")?.replace("</?i>".toRegex(), "*")
+        get() = media.description?.replace("</?br>".toRegex(RegexOption.IGNORE_CASE), "")
+            ?.replace("</?i>".toRegex(), "*")
     override val thumbnailUrl: String?
         get() = media.coverImage?.extraLarge ?: media.coverImage?.large ?: media.coverImage?.medium
     override val type: DomainMediaType?

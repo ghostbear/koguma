@@ -219,11 +219,22 @@ val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
         actionRow(mediaQuery)
     }
 
+fun String.ellipsisIfNeeded(limit: Int): String {
+    var count = 0
+    val text = takeWhile { char ->
+        if (char.isWhitespace()) {
+            count++
+        }
+        count < limit
+    }
+    return "$text…".takeIf { (text.length < length) } ?: text
+}
+
 fun MessageBuilder.embed(media: Media) {
     embed {
         url = media.url
         title = media.title
-        description = media.description
+        description = media.description?.ellipsisIfNeeded(64)
         color = media.color?.let { Color(it) }
         media.thumbnailUrl?.let { thumbnailUrl ->
             thumbnail {
