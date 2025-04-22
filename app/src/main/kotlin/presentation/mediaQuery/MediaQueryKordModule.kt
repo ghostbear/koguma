@@ -87,12 +87,13 @@ suspend fun Kord.mediaQueryModule(
 
         if (componentId == "next" || componentId == "previous") {
             val sessionId = interaction.message.messageReference?.reference() ?: interaction.message.reference()
-            val sessionOrNull =
-                sessionStore.getOrNull(sessionId) ?: return@on.also {
-                    interaction.updatePublicMessage {
-                        components = mutableListOf()
-                    }
+            val sessionOrNull = sessionStore.getOrNull(sessionId)
+            if (sessionOrNull == null) {
+                interaction.updatePublicMessage {
+                    components = mutableListOf()
                 }
+                return@on
+            }
 
             val direction = if (componentId == "next") 1 else -1
             val mediaQuery = when (sessionOrNull) {
