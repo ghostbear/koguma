@@ -59,13 +59,24 @@ suspend fun main() {
         CaffeineSessionStore<DiscordMessageReference, DiscordSession>(
             Caffeine.newBuilder()
                 .expireAfterWrite(5.minutes.toJavaDuration())
-                .maximumSize(32)
-                .removalListener<DiscordMessageReference, DiscordSession> { id, _, cause ->
+                .maximumSize(64)
+                .removalListener<DiscordMessageReference, DiscordSession> { id, session, cause ->
                     if (cause == RemovalCause.REPLACED) return@removalListener
                     kord.launch {
-                        val (messageId, channelId) = id!!
-                        kord.rest.channel.editMessage(channelId, messageId) {
-                            components = mutableListOf()
+                        when {
+                            session is DiscordSession.Message -> {
+                                val (messageId, channelId) = session.replyReference
+                                kord.rest.channel.editMessage(channelId, messageId) {
+                                    components = mutableListOf()
+                                }
+                            }
+
+                            else -> {
+                                val (messageId, channelId) = id ?: return@launch
+                                kord.rest.channel.editMessage(channelId, messageId) {
+                                    components = mutableListOf()
+                                }
+                            }
                         }
                     }
                 }
