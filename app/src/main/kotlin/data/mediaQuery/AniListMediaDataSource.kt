@@ -10,7 +10,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
-import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
@@ -19,26 +18,26 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaType
 class AniListMediaDataSource(
     val apolloClient: ApolloClient,
 ) : MediaDataSource {
-    override suspend fun query(mediaQuery: MediaQuery): MediaResult<Media> {
+    override suspend fun query(mediaQuery: MediaQuery): MediaResult {
         val response = _query(mediaQuery)
 
         if (response.errors != null && response.errors!!.isNotEmpty()) {
-            return MediaResult.Error.Message(response.errors!!.joinToString(separator = ",") { it.message }, mediaQuery)
+            return MediaResult.Failure(response.errors!!.joinToString(separator = ",") { it.message }, mediaQuery)
         }
 
         val page = response.data?.page
         if (page == null) {
-            return MediaResult.Error.Message("Missing page", mediaQuery)
+            return MediaResult.Failure("Missing page", mediaQuery)
         }
 
         val pageInfo = page.pageInfo
         if (pageInfo == null) {
-            return MediaResult.Error.Message("Missing page info", mediaQuery)
+            return MediaResult.Failure("Missing page info", mediaQuery)
         }
 
         val mediaOrNull = page.media?.firstOrNull()
         if (mediaOrNull == null) {
-            return MediaResult.Error.NotFound(mediaQuery)
+            return MediaResult.NotFound(mediaQuery)
         }
 
         return MediaResult.Success(
@@ -48,7 +47,7 @@ class AniListMediaDataSource(
 
     }
 
-    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult<Media>> = coroutineScope {
+    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult> = coroutineScope {
         withContext(Dispatchers.IO) {
             mediaQuery.map { async { query(it) } }.awaitAll()
         }
@@ -67,7 +66,7 @@ class AniListMediaDataSource(
             MediaType.NOVEL -> null
         }
 
-        val genresNotIn  = listOf("Hentai", "Ecchi").takeUnless { mediaQuery.allowNsfw }
+        val genresNotIn = listOf("Hentai", "Ecchi").takeUnless { mediaQuery.allowNsfw }
 
         val query = SearchMediaQuery(
             query = mediaQuery.query,

@@ -2,12 +2,13 @@ package me.ghostbear.koguma.presentation.mediaQuery
 
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.interaction.updatePublicMessage
-import dev.kord.core.behavior.reply
+import dev.kord.core.cache.data.MessageData
 import dev.kord.core.entity.Message
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
@@ -29,6 +30,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
+import me.ghostbear.koguma.ext.createOrEditReply
 import me.ghostbear.koguma.ext.nsfw
 import me.ghostbear.koguma.ext.on
 import me.ghostbear.koguma.ext.takeIf
@@ -75,9 +77,8 @@ suspend fun Kord.mediaQueryModule(
                     val message = deferredResponse.respond(result.messageBuilder)
                     sessionStore.put(message.message.reference(), DiscordSession.Interaction(result.mediaQuery))
                 }
-
-                is MediaResult.Error.Message -> deferredResponse.delete()
-                is MediaResult.Error.NotFound -> deferredResponse.delete()
+                is MediaResult.NotFound -> deferredResponse.delete()
+                is MediaResult.Failure -> deferredResponse.delete()
             }
         }
     }
@@ -104,8 +105,8 @@ suspend fun Kord.mediaQueryModule(
 
             val result = dataSource.query(query)
             when (result) {
-                is MediaResult.Error.Message -> {}
-                is MediaResult.Error.NotFound -> {}
+                is MediaResult.Failure -> {}
+                is MediaResult.NotFound -> {}
                 is MediaResult.Success -> {
                     interaction.updatePublicMessage(result.messageBuilder)
                     sessionStore.put(sessionId, DiscordSession.Interaction(result.mediaQuery))
@@ -115,6 +116,48 @@ suspend fun Kord.mediaQueryModule(
         if (componentId == "freeze") {
             interaction.message.edit {
                 components = mutableListOf()
+            }
+        }
+    }
+
+    val messageBulider: MessageBuilder.(List<MediaResult>) -> Unit = builder@{ results ->
+        content = null
+        embeds = mutableListOf()
+        components = mutableListOf()
+
+        if (results.size == 1) {
+            val result = results.first()
+            when (result) {
+                is MediaResult.Success -> {
+                    allowedMentions {
+                        repliedUser = false
+                    }
+                    result.messageBuilder(this)
+                }
+
+                is MediaResult.Failure -> {
+                }
+
+                is MediaResult.NotFound -> {
+                }
+            }
+            return@builder
+        }
+
+        content = buildString {
+            results.filterIsInstance<MediaResult.Success>()
+                .forEach { append("- [${it.media.title}](<${it.media.url}>)\n") }
+
+            val notFound = results.filterIsInstance<MediaResult.NotFound>()
+            if (notFound.isNotEmpty()) {
+                append("Could not find\n")
+                notFound.forEach { append("- ${it.mediaQuery.query}\n") }
+            }
+
+            val errorMessages = results.filterIsInstance<MediaResult.Failure>()
+            if (errorMessages.isNotEmpty()) {
+                append("Could not retrieve\n")
+                errorMessages.forEach { append("- ${it.mediaQuery.query}\n") }
             }
         }
     }
@@ -132,85 +175,36 @@ suspend fun Kord.mediaQueryModule(
             return@process
         }
 
-        val messageBulider: MessageBuilder.(List<MediaResult<Media>>) -> Unit = builder@{ results ->
-            content = null
-            embeds = mutableListOf()
-            components = mutableListOf()
-
-            if (results.size == 1) {
-                val result = results.first()
-                when (result) {
-                    is MediaResult.Success -> {
-                        allowedMentions {
-                            repliedUser = false
-                        }
-                        result.messageBuilder(this)
-                    }
-
-                    is MediaResult.Error.Message -> {
-                    }
-
-                    is MediaResult.Error.NotFound -> {
-                    }
-                }
-                return@builder
-            }
-
-            content = buildString {
-                results.filterIsInstance<MediaResult.Success>()
-                    .forEach { append("- [${it.media.title}](<${it.media.url}>)\n") }
-
-                val notFound = results.filterIsInstance<MediaResult.Error.NotFound>()
-                if (notFound.isNotEmpty()) {
-                    append("Could not find\n")
-                    notFound.forEach { append("- ${it.mediaQuery.query}\n") }
-                }
-
-                val errorMessages = results.filterIsInstance<MediaResult.Error.Message>()
-                if (errorMessages.isNotEmpty()) {
-                    append("Could not retrieve\n")
-                    errorMessages.forEach { append("- ${it.mediaQuery.query}\n") }
-                }
-            }
-        }
-
         message.channel.withTyping {
             val channel = asChannel()
             val queries = matches.map { MediaQuery(it.query, it.type, channel.nsfw, it.page) }.toTypedArray()
 
             val results = dataSource.query(*queries)
 
-            val replyReference = if (activeSessionOrNull != null) {
-                val (messageId, channelId) = activeSessionOrNull.replyReference
-                rest.channel.editMessage(channelId, messageId) {
-                    allowedMentions {
-                        repliedUser = false
-                    }
-                    messageBulider(this, results)
+            val channelId = activeSessionOrNull?.replyReference?.channelId ?: id
+            val replyMessageId = activeSessionOrNull?.replyReference?.messageId
+            val referenceMessageId = message.id.takeIf { activeSessionOrNull == null }
+            val reply = message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
+                allowedMentions {
+                    repliedUser = false
                 }
-                activeSessionOrNull.replyReference
-            } else {
-                message.reply {
-                    allowedMentions {
-                        repliedUser = false
-                    }
-                    messageBulider(this, results)
-                }.reference()
+                messageBulider(this, results)
             }
 
             sessionStore.put(
                 sessionId,
-                DiscordSession.Message(queries, replyReference)
+                DiscordSession.Message(queries, reply.reference())
             )
         }
     }
+
 
     on<MessageCreateEvent> {
         process(message)
     }
 
     on<MessageUpdateEvent> {
-        process(message.asMessage())
+        process(getMessage())
     }
 }
 
