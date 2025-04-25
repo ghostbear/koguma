@@ -150,86 +150,57 @@ suspend fun Kord.mediaQueryModule(
                     launch { message.deleteOwnReaction(it.emoji) }
                 }
 
-            val defaultBuilder: MessageBuilder.() -> Unit = {
-                content = null
-                embeds = mutableListOf()
-                components = mutableListOf()
-                allowedMentions {
-                    repliedUser = false
-                }
-            }
-
-            if (results.size == 1) {
-                val result = results.first()
-                when (result) {
-                    is MediaResult.Success -> {
-                        val reply = message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
-                            defaultBuilder()
-                            result.messageBuilder(this)
-                        }
-                        sessionStore.put(
-                            sessionId,
-                            DiscordSession.Message(queries, reply.reference())
-                        )
-                    }
-
-                    is MediaResult.Failure -> {
-                        activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
-                        val referenceMessage = channel.getMessage(sessionId.messageId)
-                        referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
-                    }
-
-                    is MediaResult.NotFound -> {
-                        activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
-                        val referenceMessage = channel.getMessage(sessionId.messageId)
-                        if (!channel.nsfw) {
-                            referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDEE1\uFE0F"))
-                        }
-                        referenceMessage.addReaction(ReactionEmoji.Unicode("\u2753"))
+            val result = results.first().takeIf { results.size == 1 }
+            val reply = when {
+                result is MediaResult.Success -> {
+                    message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
+                        defaultBuilder()
+                        result.messageBuilder(this)
                     }
                 }
-            } else {
-                when {
-                    results.all { it is MediaResult.Failure } -> {
-                        activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
-                        val referenceMessage = channel.getMessage(sessionId.messageId)
-                        referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
+                result is MediaResult.NotFound || results.all { it is MediaResult.NotFound } -> {
+                    activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
+                    val referenceMessage = channel.getMessage(sessionId.messageId)
+                    if (!channel.nsfw) {
+                        referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDEE1\uFE0F"))
                     }
-                    results.all { it is MediaResult.NotFound } -> {
-                        activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
-                        val referenceMessage = channel.getMessage(sessionId.messageId)
-                        if (!channel.nsfw) {
-                            referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDEE1\uFE0F"))
-                        }
-                        referenceMessage.addReaction(ReactionEmoji.Unicode("\u2753"))
-                    }
-                    else -> {
-                        val reply = message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
-                            defaultBuilder()
-                            content = buildString {
-                                results.filterIsInstance<MediaResult.Success>()
-                                    .forEach { this.append("- [${it.media.title}](<${it.media.url}>)\n") }
+                    referenceMessage.addReaction(ReactionEmoji.Unicode("\u2753"))
+                    null
+                }
+                result is MediaResult.Failure || results.all { it is MediaResult.Failure } -> {
+                    activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
+                    val referenceMessage = channel.getMessage(sessionId.messageId)
+                    referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
+                    null
+                }
+                else -> {
+                    message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
+                        defaultBuilder()
+                        content = buildString {
+                            results.filterIsInstance<MediaResult.Success>()
+                                .forEach { this.append("- [${it.media.title}](<${it.media.url}>)\n") }
 
-                                val notFound = results.filterIsInstance<MediaResult.NotFound>()
-                                if (notFound.isNotEmpty()) {
-                                    this.append("Could not find\n")
-                                    notFound.forEach { this.append("- ${it.mediaQuery.query}\n") }
-                                }
+                            val notFound = results.filterIsInstance<MediaResult.NotFound>()
+                            if (notFound.isNotEmpty()) {
+                                this.append("Could not find\n")
+                                notFound.forEach { this.append("- ${it.mediaQuery.query}\n") }
+                            }
 
-                                val errorMessages = results.filterIsInstance<MediaResult.Failure>()
-                                if (errorMessages.isNotEmpty()) {
-                                    this.append("Could not retrieve\n")
-                                    errorMessages.forEach { this.append("- ${it.mediaQuery.query}\n") }
-                                }
+                            val errorMessages = results.filterIsInstance<MediaResult.Failure>()
+                            if (errorMessages.isNotEmpty()) {
+                                this.append("Could not retrieve\n")
+                                errorMessages.forEach { this.append("- ${it.mediaQuery.query}\n") }
                             }
                         }
-
-                        sessionStore.put(
-                            sessionId,
-                            DiscordSession.Message(queries, reply.reference())
-                        )
                     }
+
                 }
+            }
+            if (reply != null) {
+                sessionStore.put(
+                    sessionId,
+                    DiscordSession.Message(queries, reply.reference())
+                )
             }
         }
     }
@@ -240,6 +211,15 @@ suspend fun Kord.mediaQueryModule(
 
     on<MessageUpdateEvent> {
         process(getMessage())
+    }
+}
+
+val defaultBuilder: MessageBuilder.() -> Unit = {
+    content = null
+    embeds = mutableListOf()
+    components = mutableListOf()
+    allowedMentions {
+        repliedUser = false
     }
 }
 
