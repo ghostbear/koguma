@@ -2,13 +2,11 @@ package me.ghostbear.koguma.presentation.mediaQuery
 
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.interaction.updatePublicMessage
-import dev.kord.core.cache.data.MessageData
 import dev.kord.core.entity.Message
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
@@ -77,6 +75,7 @@ suspend fun Kord.mediaQueryModule(
                     val message = deferredResponse.respond(result.messageBuilder)
                     sessionStore.put(message.message.reference(), DiscordSession.Interaction(result.mediaQuery))
                 }
+
                 is MediaResult.NotFound -> deferredResponse.delete()
                 is MediaResult.Failure -> deferredResponse.delete()
             }
@@ -120,48 +119,6 @@ suspend fun Kord.mediaQueryModule(
         }
     }
 
-    val messageBulider: MessageBuilder.(List<MediaResult>) -> Unit = builder@{ results ->
-        content = null
-        embeds = mutableListOf()
-        components = mutableListOf()
-
-        if (results.size == 1) {
-            val result = results.first()
-            when (result) {
-                is MediaResult.Success -> {
-                    allowedMentions {
-                        repliedUser = false
-                    }
-                    result.messageBuilder(this)
-                }
-
-                is MediaResult.Failure -> {
-                }
-
-                is MediaResult.NotFound -> {
-                }
-            }
-            return@builder
-        }
-
-        content = buildString {
-            results.filterIsInstance<MediaResult.Success>()
-                .forEach { append("- [${it.media.title}](<${it.media.url}>)\n") }
-
-            val notFound = results.filterIsInstance<MediaResult.NotFound>()
-            if (notFound.isNotEmpty()) {
-                append("Could not find\n")
-                notFound.forEach { append("- ${it.mediaQuery.query}\n") }
-            }
-
-            val errorMessages = results.filterIsInstance<MediaResult.Failure>()
-            if (errorMessages.isNotEmpty()) {
-                append("Could not retrieve\n")
-                errorMessages.forEach { append("- ${it.mediaQuery.query}\n") }
-            }
-        }
-    }
-
     val process: suspend (Message) -> Unit = process@{ message ->
         val sessionId = message.reference()
         val activeSessionOrNull = sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Message>()
@@ -185,10 +142,49 @@ suspend fun Kord.mediaQueryModule(
             val replyMessageId = activeSessionOrNull?.replyReference?.messageId
             val referenceMessageId = message.id.takeIf { activeSessionOrNull == null }
             val reply = message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
+                content = null
+                embeds = mutableListOf()
+                components = mutableListOf()
                 allowedMentions {
                     repliedUser = false
                 }
-                messageBulider(this, results)
+
+                if (results.size == 1) {
+                    val result = results.first()
+                    when (result) {
+                        is MediaResult.Success -> {
+                            allowedMentions {
+                                repliedUser = false
+                            }
+                            result.messageBuilder(this)
+                        }
+
+                        is MediaResult.Failure -> {
+                        }
+
+                        is MediaResult.NotFound -> {
+                        }
+                    }
+                    return@createOrEditReply
+                }
+
+                content = buildString {
+                    results.filterIsInstance<MediaResult.Success>()
+                        .forEach { this.append("- [${it.media.title}](<${it.media.url}>)\n") }
+
+                    val notFound = results.filterIsInstance<MediaResult.NotFound>()
+                    if (notFound.isNotEmpty()) {
+                        this.append("Could not find\n")
+                        notFound.forEach { this.append("- ${it.mediaQuery.query}\n") }
+                    }
+
+                    val errorMessages = results.filterIsInstance<MediaResult.Failure>()
+                    if (errorMessages.isNotEmpty()) {
+                        this.append("Could not retrieve\n")
+                        errorMessages.forEach { this.append("- ${it.mediaQuery.query}\n") }
+                    }
+                }
+
             }
 
             sessionStore.put(
