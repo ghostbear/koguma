@@ -104,6 +104,12 @@ suspend fun Kord.mediaQueryModule(
     on<ButtonInteractionCreateEvent> {
         val componentId = interaction.componentId
 
+        interaction.message.reactions
+            .filter { it.selfReacted }
+            .forEach {
+                launch { interaction.message.deleteOwnReaction(it.emoji) }
+            }
+
         if (componentId == "next" || componentId == "previous") {
             val sessionId = interaction.message.messageReference?.reference() ?: interaction.message.reference()
             val sessionOrNull = sessionStore.getOrNull(sessionId)
@@ -123,8 +129,16 @@ suspend fun Kord.mediaQueryModule(
 
             val result = dataSource.query(query)
             when (result) {
-                is MediaResult.Failure -> {}
-                is MediaResult.NotFound -> {}
+                is MediaResult.Failure -> {
+                    interaction.message.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
+                }
+                is MediaResult.NotFound -> {
+                    val channel = interaction.getChannel()
+                    if (!channel.nsfw) {
+                        interaction.message.addReaction(ReactionEmoji.Unicode("\uD83D\uDEE1\uFE0F"))
+                    }
+                    interaction.message.addReaction(ReactionEmoji.Unicode("\u2753"))
+                }
                 is MediaResult.Success -> {
                     interaction.updatePublicMessage(result.messageBuilder)
                     sessionStore.put(sessionId, DiscordSession.Interaction(result.mediaQuery))
