@@ -1,5 +1,7 @@
 package me.ghostbear.koguma.data.mediaQueryParser
 
+import me.ghostbear.koguma.ext.trace
+
 interface Expr {
     data class Group(val leftType: TokenType, val literals: List<Literal?>, val rightType: TokenType) : Expr
     data class Index(val literal: Literal?) : Expr
@@ -26,7 +28,7 @@ fun TokenType.opposite(): TokenType {
 class Parser(val tokens: List<Token>) {
     private var current = 0
 
-    fun expression(): List<Expr>  {
+    fun expression(): List<Expr> = trace("parser", "expression") {
         val expressions = mutableListOf<Expr>()
         while (!isAtEnd()) {
             if (!match(TokenType.DOUBLE_LESSER_THAN, TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACES)) {

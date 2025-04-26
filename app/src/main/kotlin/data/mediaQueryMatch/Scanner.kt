@@ -1,5 +1,7 @@
 package me.ghostbear.koguma.data.mediaQueryParser
 
+import me.ghostbear.koguma.ext.trace
+
 class Scanner(
     private val source: String,
 ) {
@@ -18,7 +20,7 @@ class Scanner(
         tokens.add(Token(type, text, literal))
     }
 
-    fun scanTokens(): List<Token> {
+    fun scanTokens(): List<Token> = trace("scanner", "scan_tokens") {
         while (!isAtEnd()) {
             start = current
             scanToken()

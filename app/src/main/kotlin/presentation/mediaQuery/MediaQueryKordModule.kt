@@ -18,6 +18,7 @@ import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.embed
+import io.sentry.Sentry
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
@@ -60,8 +61,8 @@ suspend fun Kord.mediaQueryModule(
     }
 
     on<ChatInputCommandInteractionCreateEvent> {
+        Sentry.addBreadcrumb("${interaction.channelId.value}-${interaction.command.rootName}")
         val command = interaction.command
-
         if (command.rootName == "search") {
             val deferredResponse = interaction.deferPublicResponse()
             val query = command.strings["query"]!!
@@ -74,6 +75,13 @@ suspend fun Kord.mediaQueryModule(
 
             val channel = interaction.channel.asChannel()
             val result = dataSource.query(MediaQuery(query, type, channel.nsfw))
+
+            Sentry.configureScope { scope ->
+                scope.setExtra("query", query)
+                scope.setExtra("type", type.name)
+                scope.setExtra("nsfw", channel.nsfw.toString())
+            }
+
             when (result) {
                 is MediaResult.Success -> {
                     val message = deferredResponse.respond(result.messageBuilder)
@@ -103,6 +111,7 @@ suspend fun Kord.mediaQueryModule(
     }
 
     on<ButtonInteractionCreateEvent> {
+        Sentry.addBreadcrumb("${interaction.message.channelId.value}-${interaction.message.id.value}")
         val componentId = interaction.componentId
 
         interaction.message.deleteOwnReactions()
@@ -154,6 +163,10 @@ suspend fun Kord.mediaQueryModule(
     val process: suspend (Message) -> Unit = process@{ message ->
         val sessionId = message.reference()
         val activeSessionOrNull = sessionStore.getOrNull(sessionId).takeIf<DiscordSession.Message>()
+
+        Sentry.configureScope { scope ->
+            scope.setExtra("content", message.content)
+        }
 
         val (matches) = matcher.match(message.content)
         if (matches.isEmpty()) {
@@ -245,10 +258,12 @@ suspend fun Kord.mediaQueryModule(
     }
 
     on<MessageCreateEvent> {
+        Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
         process(message)
     }
 
     on<MessageUpdateEvent> {
+        Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
         process(getMessage())
     }
 }

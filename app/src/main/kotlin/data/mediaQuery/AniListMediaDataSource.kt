@@ -14,11 +14,12 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.ext.trace
 
 class AniListMediaDataSource(
     val apolloClient: ApolloClient,
 ) : MediaDataSource {
-    override suspend fun query(mediaQuery: MediaQuery): MediaResult {
+    override suspend fun query(mediaQuery: MediaQuery): MediaResult = trace("anilist", "query") {
         val response = _query(mediaQuery)
 
         if (response.errors != null && response.errors!!.isNotEmpty()) {

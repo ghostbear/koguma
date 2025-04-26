@@ -13,6 +13,10 @@ import dev.kord.gateway.PrivilegedIntent
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.sentry.Sentry
+import io.sentry.SentryLevel
+import io.sentry.SentryOptions
+import io.sentry.SpanStatus
+import io.sentry.protocol.SentryTransaction
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
@@ -31,6 +35,18 @@ suspend fun main() {
         options.isEnabled = false
         options.isEnableExternalConfiguration = true
         options.isSendDefaultPii = true
+        options.tracesSampleRate = 1.0
+        options.environment = "development"
+        options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
+            if (!event.isErrored)
+                event.removeExtra("content")
+            event
+        }
+        options.beforeSendTransaction = SentryOptions.BeforeSendTransactionCallback { transaction, hint ->
+            if (transaction.status != SpanStatus.UNKNOWN_ERROR)
+                transaction.removeExtra("content")
+            transaction
+        }
     }
 
     val config = root.safely { getConfig("koguma") } ?: throw IllegalStateException("Missing configuration '$.koguma'")
