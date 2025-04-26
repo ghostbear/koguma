@@ -33,3 +33,9 @@ Check out {{anime}}[2] and <<manga>>[3]
 ```
 
 Remember that updating chat messages will trigger searches, which makes it easier to page through results for list results.
+
+## Error Codes
+
+- 🛡️: Hentai or Ecchi was filtered out
+- ❓: No search results were found
+- 🔥: An unexpected error happened
