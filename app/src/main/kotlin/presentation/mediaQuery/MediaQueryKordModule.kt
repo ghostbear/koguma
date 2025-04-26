@@ -20,7 +20,6 @@ import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.embed
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
@@ -33,6 +32,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
 import me.ghostbear.koguma.ext.createOrEditReply
+import me.ghostbear.koguma.ext.deleteOwnReactions
 import me.ghostbear.koguma.ext.nsfw
 import me.ghostbear.koguma.ext.on
 import me.ghostbear.koguma.ext.takeIf
@@ -90,6 +90,7 @@ suspend fun Kord.mediaQueryModule(
                     delay(2.seconds)
                     message.delete()
                 }
+
                 is MediaResult.Failure -> {
                     val message = deferredResponse.respond {
                         content = "\uD83D\uDD25 Something went wrong, the turd was sampled and sent for analysis."
@@ -104,11 +105,7 @@ suspend fun Kord.mediaQueryModule(
     on<ButtonInteractionCreateEvent> {
         val componentId = interaction.componentId
 
-        interaction.message.reactions
-            .filter { it.selfReacted }
-            .forEach {
-                launch { interaction.message.deleteOwnReaction(it.emoji) }
-            }
+        interaction.message.deleteOwnReactions()
 
         if (componentId == "next" || componentId == "previous") {
             val sessionId = interaction.message.messageReference?.reference() ?: interaction.message.reference()
@@ -132,6 +129,7 @@ suspend fun Kord.mediaQueryModule(
                 is MediaResult.Failure -> {
                     interaction.message.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
                 }
+
                 is MediaResult.NotFound -> {
                     val channel = interaction.getChannel()
                     if (!channel.nsfw) {
@@ -139,6 +137,7 @@ suspend fun Kord.mediaQueryModule(
                     }
                     interaction.message.addReaction(ReactionEmoji.Unicode("\u2753"))
                 }
+
                 is MediaResult.Success -> {
                     interaction.updatePublicMessage(result.messageBuilder)
                     sessionStore.put(sessionId, DiscordSession.Interaction(result.mediaQuery))
@@ -175,11 +174,7 @@ suspend fun Kord.mediaQueryModule(
             val replyMessageId = activeSessionOrNull?.replyReference?.messageId
             val referenceMessageId = sessionId.messageId.takeIf { activeSessionOrNull == null }
 
-            message.reactions
-                .filter { it.selfReacted }
-                .forEach {
-                    launch { message.deleteOwnReaction(it.emoji) }
-                }
+            message.deleteOwnReactions()
 
             val result = results.first().takeIf { results.size == 1 }
             val reply = when {
@@ -189,8 +184,14 @@ suspend fun Kord.mediaQueryModule(
                         result.messageBuilder(this)
                     }
                 }
+
                 result is MediaResult.NotFound || results.all { it is MediaResult.NotFound } -> {
-                    activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
+                    activeSessionOrNull?.let { session ->
+                        channel.deleteMessage(
+                            session.replyReference.messageId,
+                            "User message doesn't include any search matches"
+                        )
+                    }
                     val referenceMessage = channel.getMessage(sessionId.messageId)
                     if (!channel.nsfw) {
                         referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDEE1\uFE0F"))
@@ -198,12 +199,19 @@ suspend fun Kord.mediaQueryModule(
                     referenceMessage.addReaction(ReactionEmoji.Unicode("\u2753"))
                     null
                 }
+
                 result is MediaResult.Failure || results.all { it is MediaResult.Failure } -> {
-                    activeSessionOrNull?.let { session -> channel.deleteMessage(session.replyReference.messageId, "User message doesn't include any search matches") }
+                    activeSessionOrNull?.let { session ->
+                        channel.deleteMessage(
+                            session.replyReference.messageId,
+                            "User message doesn't include any search matches"
+                        )
+                    }
                     val referenceMessage = channel.getMessage(sessionId.messageId)
                     referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
                     null
                 }
+
                 else -> {
                     message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
                         defaultBuilder()

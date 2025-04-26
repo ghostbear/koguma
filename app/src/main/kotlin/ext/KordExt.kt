@@ -4,6 +4,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.cache.data.MessageData
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.Channel
 import dev.kord.core.event.Event
 import dev.kord.rest.builder.message.MessageBuilder
@@ -11,7 +12,9 @@ import io.sentry.Sentry
 import io.sentry.kotlin.SentryContext
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
@@ -36,6 +39,15 @@ suspend fun Message.createOrEditReply(channelId: Snowflake, messageId: Snowflake
     }
     val data = MessageData.from(message)
     return Message(data, kord)
+}
+
+suspend fun Message.deleteOwnReactions(): Unit = coroutineScope {
+    reactions.filter { it.selfReacted }
+        .forEach {
+            launch(Dispatchers.IO) {
+                deleteReaction(it.emoji)
+            }
+        }
 }
 
 inline fun <reified T : Event> Kord.on(
