@@ -18,6 +18,8 @@ import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.embed
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
@@ -78,8 +80,23 @@ suspend fun Kord.mediaQueryModule(
                     sessionStore.put(message.message.reference(), DiscordSession.Interaction(result.mediaQuery))
                 }
 
-                is MediaResult.NotFound -> deferredResponse.delete()
-                is MediaResult.Failure -> deferredResponse.delete()
+                is MediaResult.NotFound -> {
+                    val message = deferredResponse.respond {
+                        content = "❓ Couldn't find any results."
+                        if (!channel.nsfw) {
+                            content += "\n\n\uD83D\uDEE1\uFE0F This is a SFW channel, hentai and ecchi was filtered out."
+                        }
+                    }
+                    delay(2.seconds)
+                    message.delete()
+                }
+                is MediaResult.Failure -> {
+                    val message = deferredResponse.respond {
+                        content = "\uD83D\uDD25 Something went wrong, the turd was sampled and sent for analysis."
+                    }
+                    delay(2.seconds)
+                    message.delete()
+                }
             }
         }
     }
