@@ -6,4 +6,5 @@ interface SessionStore<K, V> {
 
     fun put(sessionId: K, value: V)
 
+    fun remove(sessionId: K)
 }

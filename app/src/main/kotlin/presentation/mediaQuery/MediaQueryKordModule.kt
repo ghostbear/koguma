@@ -204,6 +204,7 @@ suspend fun Kord.mediaQueryModule(
                             session.replyReference.messageId,
                             "User message doesn't include any search matches"
                         )
+                        sessionStore.remove(sessionId)
                     }
                     val referenceMessage = channel.getMessage(sessionId.messageId)
                     if (!channel.nsfw) {
@@ -219,6 +220,7 @@ suspend fun Kord.mediaQueryModule(
                             session.replyReference.messageId,
                             "User message doesn't include any search matches"
                         )
+                        sessionStore.remove(sessionId)
                     }
                     val referenceMessage = channel.getMessage(sessionId.messageId)
                     referenceMessage.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))

@@ -13,4 +13,8 @@ class CaffeineSessionStore<K : Any, V : Any>(
     override fun put(sessionId: K, value: V) {
         cache.put(sessionId, value)
     }
+
+    override fun remove(sessionId: K) {
+        cache.invalidate(sessionId)
+    }
 }
