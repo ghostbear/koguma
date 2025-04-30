@@ -21,7 +21,7 @@ class ParserTest {
             Token(TokenType.STRING, "Online", "Online"),
             Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.LEFT_BRACKETS),
-            Token(TokenType.NUMBER, "1", 1.0),
+            Token(TokenType.NUMBER, "1", 1),
             Token(TokenType.RIGHT_BRACKETS),
             Token(TokenType.STRING, ",", ","),
             Token(TokenType.LEFT_DOUBLE_BRACES),
@@ -48,7 +48,7 @@ class ParserTest {
                     ),
                     TokenType.DOUBLE_GREATER_THAN
                 ),
-                Expr.Index(Expr.Literal(1.0))
+                Expr.Index(Expr.Literal(1))
             ),
             Expr.Group(
                 TokenType.LEFT_DOUBLE_BRACES,
@@ -101,7 +101,7 @@ class ParserTest {
             Token(TokenType.STRING, "Summer", "Summer"),
             Token(TokenType.STRING, "of", "of"),
             Token(TokenType.STRING, "August", "August"),
-            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.NUMBER, "31", 31),
             Token(TokenType.STRING, "st", "st"),
             Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.STRING, "instead?", "instead?"),
@@ -115,7 +115,7 @@ class ParserTest {
                     Expr.Literal("Summer"),
                     Expr.Literal("of"),
                     Expr.Literal("August"),
-                    Expr.Literal(31.0),
+                    Expr.Literal(31),
                     Expr.Literal("st"),
                 ),
                 TokenType.DOUBLE_GREATER_THAN
@@ -136,7 +136,7 @@ class ParserTest {
             Token(TokenType.STRING, "Online", "Online"),
             Token(TokenType.DOUBLE_LESSER_THAN),
             Token(TokenType.LEFT_BRACKETS),
-            Token(TokenType.NUMBER, "1", 1.0),
+            Token(TokenType.NUMBER, "1", 1),
             Token(TokenType.RIGHT_BRACKETS),
             Token(TokenType.EOF, ""),
         )
@@ -152,9 +152,9 @@ class ParserTest {
             Token(TokenType.STRING, "we", "we"),
             Token(TokenType.STRING, "read", "read"),
             Token(TokenType.DOUBLE_LESSER_THAN),
-            Token(TokenType.NUMBER, "8", 8.0),
+            Token(TokenType.NUMBER, "8", 8),
             Token(TokenType.STRING, "-gatsu", "-gatsu"),
-            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.NUMBER, "31", 31),
             Token(TokenType.STRING, "-nichi", "-nichi"),
             Token(TokenType.STRING, "no", "no"),
             Token(TokenType.STRING, "Long", "Long"),
@@ -167,9 +167,9 @@ class ParserTest {
             Expr.Group(
                 TokenType.DOUBLE_LESSER_THAN,
                 listOf(
-                    Expr.Literal(8.0),
+                    Expr.Literal(8),
                     Expr.Literal("-gatsu"),
-                    Expr.Literal(31.0),
+                    Expr.Literal(31),
                     Expr.Literal("-nichi"),
                     Expr.Literal("no"),
                     Expr.Literal(        "Long"),

@@ -88,13 +88,16 @@ class Scanner(
     fun number() {
         while (isDigit(peek())) advance()
 
+        var isFloat = false
         if (peek() == '.' && isDigit(peek(1))) {
+            isFloat = true
             advance()
             while (isDigit(peek())) advance()
         }
 
         val value = source.substring(start, current)
-        addToken(TokenType.NUMBER, value.toDouble())
+        val literal = value.toDouble().takeIf { isFloat } ?: value.toInt()
+        addToken(TokenType.NUMBER, literal)
     }
 
     fun string(terminator: List<Char>? = null) {

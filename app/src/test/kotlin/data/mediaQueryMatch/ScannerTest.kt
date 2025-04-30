@@ -22,7 +22,7 @@ class ScannerTest {
             Token(TokenType.STRING, "Online", "Online"),
             Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.LEFT_BRACKETS),
-            Token(TokenType.NUMBER, "1", 1.0),
+            Token(TokenType.NUMBER, "1", 1),
             Token(TokenType.RIGHT_BRACKETS),
             Token(TokenType.STRING, ",", ","),
             Token(TokenType.LEFT_DOUBLE_BRACES),
@@ -80,7 +80,7 @@ class ScannerTest {
             Token(TokenType.STRING, "Summer", "Summer"),
             Token(TokenType.STRING, "of", "of"),
             Token(TokenType.STRING, "August", "August"),
-            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.NUMBER, "31", 31),
             Token(TokenType.STRING, "st", "st"),
             Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.STRING, "instead?", "instead?"),
@@ -101,15 +101,29 @@ class ScannerTest {
             Token(TokenType.STRING, "we", "we"),
             Token(TokenType.STRING, "read", "read"),
             Token(TokenType.DOUBLE_LESSER_THAN),
-            Token(TokenType.NUMBER, "8", 8.0),
+            Token(TokenType.NUMBER, "8", 8),
             Token(TokenType.STRING, "-gatsu", "-gatsu"),
-            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.NUMBER, "31", 31),
             Token(TokenType.STRING, "-nichi", "-nichi"),
             Token(TokenType.STRING, "no", "no"),
             Token(TokenType.STRING, "Long", "Long"),
             Token(TokenType.STRING, "Summer", "Summer"),
             Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.STRING, "instead?", "instead?"),
+            Token(TokenType.EOF, ""),
+        )
+        expect(expected) { Scanner(source).scanTokens() }
+    }
+
+    @Test
+    fun numbers() {
+        val source = """
+            8 31.1
+        """.trimIndent()
+
+        val expected = listOf(
+            Token(TokenType.NUMBER, "8", 8),
+            Token(TokenType.NUMBER, "31.1", 31.1),
             Token(TokenType.EOF, ""),
         )
         expect(expected) { Scanner(source).scanTokens() }

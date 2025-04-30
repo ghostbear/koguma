@@ -37,9 +37,23 @@ class InterpreterMediaQueryMatch(private val expr: Expr) : MediaQueryMatch {
     fun page(expr: Expr): Int? {
         return when (expr) {
             is Expr.Group -> null
-            is Expr.Index -> (expr.literal?.literal as Double).toInt()
+            is Expr.Index -> (expr.literal?.literal as Number).toInt()
             is Expr.Binary -> page(expr.left) ?: page(expr.right)
             else -> throw IllegalStateException("Unexpected expression: $expr")
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as InterpreterMediaQueryMatch
+
+        return expr == other.expr
+    }
+
+    override fun hashCode(): Int {
+        return expr.hashCode()
+    }
+
 }
