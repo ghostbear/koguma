@@ -11,17 +11,18 @@ interface Expr {
 
 fun TokenType.opposite(): TokenType {
     return when (this) {
-        TokenType.LEFT_DOUBLE_BRACES ->  TokenType.RIGHT_DOUBLE_BRACES
-        TokenType.RIGHT_DOUBLE_BRACES ->  TokenType.EOF
-        TokenType.LEFT_BRACKETS ->  TokenType.RIGHT_BRACKETS
-        TokenType.LEFT_DOUBLE_BRACKETS ->  TokenType.RIGHT_DOUBLE_BRACKETS
-        TokenType.RIGHT_BRACKETS ->  TokenType.EOF
-        TokenType.RIGHT_DOUBLE_BRACKETS ->  TokenType.EOF
-        TokenType.DOUBLE_LESSER_THAN ->  TokenType.DOUBLE_GREATER_THAN
-        TokenType.DOUBLE_GREATER_THAN ->  TokenType.EOF
-        TokenType.STRING ->  TokenType.EOF
-        TokenType.NUMBER ->  TokenType.EOF
-        TokenType.EOF ->  TokenType.EOF
+        TokenType.LEFT_DOUBLE_BRACES -> TokenType.RIGHT_DOUBLE_BRACES
+        TokenType.RIGHT_DOUBLE_BRACES -> TokenType.EOF
+        TokenType.LEFT_BRACKETS -> TokenType.RIGHT_BRACKETS
+        TokenType.LEFT_DOUBLE_BRACKETS -> TokenType.RIGHT_DOUBLE_BRACKETS
+        TokenType.RIGHT_BRACKETS -> TokenType.EOF
+        TokenType.RIGHT_DOUBLE_BRACKETS -> TokenType.EOF
+        TokenType.DOUBLE_LESSER_THAN -> TokenType.DOUBLE_GREATER_THAN
+        TokenType.DOUBLE_GREATER_THAN -> TokenType.EOF
+        TokenType.STRING -> TokenType.EOF
+        TokenType.NUMBER -> TokenType.EOF
+        TokenType.EOF -> TokenType.EOF
+        TokenType.SPACE -> TokenType.EOF
     }
 }
 
@@ -53,7 +54,8 @@ class Parser(val tokens: List<Token>) {
                     val number = advance()
                     expr = Expr.Binary(expr, Expr.Index(Expr.Literal(number.literal)))
                 }
-                while (!match(optionalStart.type.opposite())) {}
+                while (!match(optionalStart.type.opposite())) {
+                }
             }
 
             expressions.add(expr)

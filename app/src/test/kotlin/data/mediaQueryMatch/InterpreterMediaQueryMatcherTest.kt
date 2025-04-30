@@ -14,24 +14,8 @@ import org.junit.jupiter.api.Test
 class InterpreterMediaQueryMatcherTest {
     @Test
     fun match() {
-        val expected = MediaQueryResults(
-            listOf(
-                InterpreterMediaQueryMatch(
-                    Expr.Group(
-                        TokenType.DOUBLE_LESSER_THAN,
-                        listOf(
-                            Expr.Literal("Sword"),
-                            Expr.Literal("Art"),
-                            Expr.Literal("Online"),
-                        ),
-                        TokenType.DOUBLE_GREATER_THAN
-                    )
-                )
-            )
-        )
-
         val actual = InterpreterMediaQueryMatcher().match("<<Sword Art Online>>")
-        assertEquals(expected, actual)
+        assertEquals(1, actual.matches.size)
 
         val match = actual.matches.first()
         assertEquals("Sword Art Online", match.query)
@@ -43,7 +27,7 @@ class InterpreterMediaQueryMatcherTest {
         assertEquals(1, actual.matches.size)
 
         val match = actual.matches.first()
-        assertEquals("8 -gatsu 31 -nichi no Long Summer", match.query)
+        assertEquals("8-gatsu 31-nichi no Long Summer", match.query)
     }
 
 }

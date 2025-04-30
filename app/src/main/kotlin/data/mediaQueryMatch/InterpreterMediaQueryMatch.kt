@@ -9,7 +9,7 @@ class InterpreterMediaQueryMatch(private val expr: Expr) : MediaQueryMatch {
 
     fun query(expr: Expr): String? {
         return when (expr) {
-            is Expr.Group -> expr.literals.joinToString(" ") { it?.literal?.toString() ?: "" }
+            is Expr.Group -> expr.literals.joinToString("") { it?.literal?.toString() ?: "" }
             is Expr.Binary -> query(expr.left) ?: query(expr.right)
             else -> throw IllegalStateException("Unexpected expression: $expr")
         }

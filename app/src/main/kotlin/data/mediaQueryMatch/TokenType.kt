@@ -7,5 +7,7 @@ enum class TokenType {
 
     STRING, NUMBER,
 
+    SPACE,
+
     EOF
 }

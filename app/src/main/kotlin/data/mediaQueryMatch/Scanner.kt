@@ -39,7 +39,8 @@ class Scanner(
             '}' -> operator('}', TokenType.RIGHT_DOUBLE_BRACES)
             '[' -> operator('[', TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_BRACKETS)
             ']' -> operator(']', TokenType.RIGHT_DOUBLE_BRACKETS, TokenType.RIGHT_BRACKETS)
-            ' ', '\r', '\t' -> {}
+            ' ' -> space()
+            '\r', '\t' -> {}
             '\n' -> line++
             else -> {
                 if (isDigit(c))
@@ -109,6 +110,13 @@ class Scanner(
 
         val value = source.substring(start, current)
         addToken(TokenType.STRING, value)
+    }
+
+    fun space() {
+        while (peek() == ' ' && !isAtEnd()) advance()
+
+        val value = source.substring(start, current)
+        addToken(TokenType.SPACE, value)
     }
 
     companion object {
