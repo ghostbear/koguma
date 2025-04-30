@@ -13,12 +13,12 @@ fun TokenType.opposite(): TokenType {
     return when (this) {
         TokenType.LEFT_DOUBLE_BRACES -> TokenType.RIGHT_DOUBLE_BRACES
         TokenType.RIGHT_DOUBLE_BRACES -> TokenType.EOF
-        TokenType.LEFT_BRACKETS -> TokenType.RIGHT_BRACKETS
+        TokenType.LEFT_BRACKET -> TokenType.RIGHT_BRACKET
         TokenType.LEFT_DOUBLE_BRACKETS -> TokenType.RIGHT_DOUBLE_BRACKETS
-        TokenType.RIGHT_BRACKETS -> TokenType.EOF
+        TokenType.RIGHT_BRACKET -> TokenType.EOF
         TokenType.RIGHT_DOUBLE_BRACKETS -> TokenType.EOF
-        TokenType.DOUBLE_LESSER_THAN -> TokenType.DOUBLE_GREATER_THAN
-        TokenType.DOUBLE_GREATER_THAN -> TokenType.EOF
+        TokenType.DOUBLE_LEFT_ANGLE_BRACKETS -> TokenType.DOUBLE_RIGHT_ANGLE_BRACKETS
+        TokenType.DOUBLE_RIGHT_ANGLE_BRACKETS -> TokenType.EOF
         TokenType.STRING -> TokenType.EOF
         TokenType.NUMBER -> TokenType.EOF
         TokenType.EOF -> TokenType.EOF
@@ -32,7 +32,7 @@ class Parser(val tokens: List<Token>) {
     fun expression(): List<Expr> = trace("parser", "expression") {
         val expressions = mutableListOf<Expr>()
         while (!isAtEnd()) {
-            if (!match(TokenType.DOUBLE_LESSER_THAN, TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACES)) {
+            if (!match(TokenType.DOUBLE_LEFT_ANGLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_DOUBLE_BRACES)) {
                 advance()
                 continue
             }
@@ -48,7 +48,7 @@ class Parser(val tokens: List<Token>) {
             var expr: Expr = Expr.Group(start.type, literals, end.type)
 
             val optionalStart = peek()
-            if (optionalStart.type == TokenType.LEFT_BRACKETS) {
+            if (optionalStart.type == TokenType.LEFT_BRACKET) {
                 advance()
                 if (peek().type == TokenType.NUMBER) {
                     val number = advance()

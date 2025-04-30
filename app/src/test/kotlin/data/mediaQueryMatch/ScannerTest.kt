@@ -19,16 +19,16 @@ class ScannerTest {
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "about", "about"),
             Token(TokenType.SPACE, " ", " "),
-            Token(TokenType.DOUBLE_LESSER_THAN),
+            Token(TokenType.DOUBLE_LEFT_ANGLE_BRACKETS),
             Token(TokenType.STRING, "Sword", "Sword"),
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "Art", "Art"),
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "Online", "Online"),
-            Token(TokenType.DOUBLE_GREATER_THAN),
-            Token(TokenType.LEFT_BRACKETS),
+            Token(TokenType.DOUBLE_RIGHT_ANGLE_BRACKETS),
+            Token(TokenType.LEFT_BRACKET),
             Token(TokenType.NUMBER, "1", 1),
-            Token(TokenType.RIGHT_BRACKETS),
+            Token(TokenType.RIGHT_BRACKET),
             Token(TokenType.STRING, ",", ","),
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.LEFT_DOUBLE_BRACES),
@@ -64,7 +64,7 @@ class ScannerTest {
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "{{{query}", "{{{query}"),
             Token(TokenType.SPACE, " ", " "),
-            Token(TokenType.LEFT_BRACKETS),
+            Token(TokenType.LEFT_BRACKET),
             Token(TokenType.STRING, "query", "query"),
             Token(TokenType.STRING, "]]]", "]]]"),
             Token(TokenType.EOF, ""),
@@ -146,13 +146,13 @@ class ScannerTest {
         val source = "<<Sword Art Online>>"
 
         val expected = listOf(
-            Token(TokenType.DOUBLE_LESSER_THAN),
+            Token(TokenType.DOUBLE_LEFT_ANGLE_BRACKETS),
             Token(TokenType.STRING, "Sword", "Sword"),
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "Art", "Art"),
             Token(TokenType.SPACE, " ", " "),
             Token(TokenType.STRING, "Online", "Online"),
-            Token(TokenType.DOUBLE_GREATER_THAN),
+            Token(TokenType.DOUBLE_RIGHT_ANGLE_BRACKETS),
             Token(TokenType.EOF, ""),
         )
         expect(expected) { Scanner(source).scanTokens() }
@@ -191,9 +191,9 @@ class ScannerTest {
         val source = "[1]"
 
         val expected = listOf(
-            Token(TokenType.LEFT_BRACKETS),
+            Token(TokenType.LEFT_BRACKET),
             Token(TokenType.NUMBER, "1", 1),
-            Token(TokenType.RIGHT_BRACKETS),
+            Token(TokenType.RIGHT_BRACKET),
             Token(TokenType.EOF, ""),
         )
         expect(expected) { Scanner(source).scanTokens() }

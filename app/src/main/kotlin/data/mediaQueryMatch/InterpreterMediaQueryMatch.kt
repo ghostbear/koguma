@@ -23,7 +23,7 @@ class InterpreterMediaQueryMatch(private val expr: Expr) : MediaQueryMatch {
             is Expr.Group -> when (expr.leftType) {
                 TokenType.LEFT_DOUBLE_BRACES -> MediaType.ANIME
                 TokenType.LEFT_DOUBLE_BRACKETS -> MediaType.NOVEL
-                TokenType.DOUBLE_LESSER_THAN -> MediaType.MANGA
+                TokenType.DOUBLE_LEFT_ANGLE_BRACKETS -> MediaType.MANGA
                 else -> throw IllegalStateException("Unexpected type: ${expr.leftType}")
             }
             is Expr.Binary -> type(expr.left) ?: type(expr.right)

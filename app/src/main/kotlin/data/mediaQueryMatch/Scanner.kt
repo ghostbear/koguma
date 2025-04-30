@@ -33,12 +33,12 @@ class Scanner(
     fun scanToken() {
         val c = advance()
         when (c) {
-            '<' -> operator('<', TokenType.DOUBLE_LESSER_THAN)
-            '>' -> operator('>', TokenType.DOUBLE_GREATER_THAN)
+            '<' -> operator('<', TokenType.DOUBLE_LEFT_ANGLE_BRACKETS)
+            '>' -> operator('>', TokenType.DOUBLE_RIGHT_ANGLE_BRACKETS)
             '{' -> operator('{', TokenType.LEFT_DOUBLE_BRACES)
             '}' -> operator('}', TokenType.RIGHT_DOUBLE_BRACES)
-            '[' -> operator('[', TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_BRACKETS)
-            ']' -> operator(']', TokenType.RIGHT_DOUBLE_BRACKETS, TokenType.RIGHT_BRACKETS)
+            '[' -> operator('[', TokenType.LEFT_DOUBLE_BRACKETS, TokenType.LEFT_BRACKET)
+            ']' -> operator(']', TokenType.RIGHT_DOUBLE_BRACKETS, TokenType.RIGHT_BRACKET)
             ' ' -> space()
             '\r', '\t' -> {}
             '\n' -> line++
