@@ -16,11 +16,11 @@ class ScannerTest {
         val expected = listOf(
             Token(TokenType.STRING, "What", "What"),
             Token(TokenType.STRING, "about", "about"),
-            Token(TokenType.DOUBLE_GREATER_THAN),
+            Token(TokenType.DOUBLE_LESSER_THAN),
             Token(TokenType.STRING, "Sword", "Sword"),
             Token(TokenType.STRING, "Art", "Art"),
             Token(TokenType.STRING, "Online", "Online"),
-            Token(TokenType.DOUBLE_LESSER_THAN),
+            Token(TokenType.DOUBLE_GREATER_THAN),
             Token(TokenType.LEFT_BRACKETS),
             Token(TokenType.NUMBER, "1", 1.0),
             Token(TokenType.RIGHT_BRACKETS),
@@ -59,6 +59,57 @@ class ScannerTest {
             Token(TokenType.STRING, "Eighty", "Eighty"),
             Token(TokenType.STRING, "Six", "Six"),
             Token(TokenType.STRING, "]]]?", "]]]?"),
+            Token(TokenType.EOF, ""),
+        )
+        expect(expected) { Scanner(source).scanTokens() }
+    }
+
+    @Test
+    fun thirtyFirst() {
+        val source = """
+            How about we read <<Long Summer of August 31st>> instead?
+        """.trimIndent()
+
+        val expected = listOf(
+            Token(TokenType.STRING, "How", "How"),
+            Token(TokenType.STRING, "about", "about"),
+            Token(TokenType.STRING, "we", "we"),
+            Token(TokenType.STRING, "read", "read"),
+            Token(TokenType.DOUBLE_LESSER_THAN),
+            Token(TokenType.STRING, "Long", "Long"),
+            Token(TokenType.STRING, "Summer", "Summer"),
+            Token(TokenType.STRING, "of", "of"),
+            Token(TokenType.STRING, "August", "August"),
+            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.STRING, "st", "st"),
+            Token(TokenType.DOUBLE_GREATER_THAN),
+            Token(TokenType.STRING, "instead?", "instead?"),
+            Token(TokenType.EOF, ""),
+        )
+        expect(expected) { Scanner(source).scanTokens() }
+    }
+
+    @Test
+    fun specialCharacters() {
+        val source = """
+            How about we read << 8-gatsu 31-nichi no Long Summer>> instead?
+        """.trimIndent()
+
+        val expected = listOf(
+            Token(TokenType.STRING, "How", "How"),
+            Token(TokenType.STRING, "about", "about"),
+            Token(TokenType.STRING, "we", "we"),
+            Token(TokenType.STRING, "read", "read"),
+            Token(TokenType.DOUBLE_LESSER_THAN),
+            Token(TokenType.NUMBER, "8", 8.0),
+            Token(TokenType.STRING, "-gatsu", "-gatsu"),
+            Token(TokenType.NUMBER, "31", 31.0),
+            Token(TokenType.STRING, "-nichi", "-nichi"),
+            Token(TokenType.STRING, "no", "no"),
+            Token(TokenType.STRING, "Long", "Long"),
+            Token(TokenType.STRING, "Summer", "Summer"),
+            Token(TokenType.DOUBLE_GREATER_THAN),
+            Token(TokenType.STRING, "instead?", "instead?"),
             Token(TokenType.EOF, ""),
         )
         expect(expected) { Scanner(source).scanTokens() }
