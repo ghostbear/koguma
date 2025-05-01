@@ -1,9 +1,9 @@
 query SearchMedia(
   $query: String!
   $page: Int!,
+  $isAdult: Boolean!
   $format_in: [MediaFormat!],
   $format_not_in: [MediaFormat!],
-  $genres_not_in: [String!]
 ) {
   page: Page(
     page: $page,
@@ -14,9 +14,9 @@ query SearchMedia(
       lastPage
     }
     media(
-      format_not_in: $format_not_in
+      format_not_in: $format_not_in,
       format_in: $format_in,
-      genre_not_in: $genres_not_in,
+      isAdult: $isAdult,
       search: $query
     ) {
       id
