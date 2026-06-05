@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQuery
+package me.ghostbear.koguma.data.mediaQueryAnilist
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
@@ -19,6 +19,11 @@ import me.ghostbear.koguma.ext.trace
 class AniListMediaDataSource(
     val apolloClient: ApolloClient,
 ) : MediaDataSource {
+
+    override fun isSupported(type: MediaType): Boolean {
+        return true
+    }
+
     override suspend fun query(mediaQuery: MediaQuery): MediaResult = trace("anilist", "query") {
         val response = _query(mediaQuery)
 

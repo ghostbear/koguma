@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQuery
+package me.ghostbear.koguma.data.mediaQueryAnilist
 
 import kotlinx.datetime.LocalDate
 import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery

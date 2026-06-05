@@ -28,6 +28,7 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     implementation(libs.bundles.kotlinx)
+    implementation(libs.kotlin.reflect)
     implementation(libs.uri)
     implementation(libs.kord.core)
     implementation(libs.logback.classic)

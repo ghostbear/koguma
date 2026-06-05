@@ -12,15 +12,17 @@ import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import io.sentry.Sentry
-import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.SpanStatus
-import io.sentry.protocol.SentryTransaction
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
-import me.ghostbear.koguma.data.mediaQuery.AniListMediaDataSource
+import me.ghostbear.koguma.data.mediaQuery.CompositeMediaDataSource
+import me.ghostbear.koguma.data.mediaQueryAnilist.AniListMediaDataSource
+import me.ghostbear.koguma.data.mediaQueryMangabaka.MangabakaMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.ext.safely
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
@@ -55,22 +57,32 @@ suspend fun main() {
     val kord = Kord(token)
     kord.mediaQueryModule(
         InterpreterMediaQueryMatcher(),
-        AniListMediaDataSource(
-            ApolloClient.Builder()
-                .serverUrl("https://graphql.anilist.co/")
-                .httpEngine(
-                    KtorHttpEngine(
-                        HttpClient {
-                            expectSuccess = false
-                            install(HttpTimeout) {
-                                connectTimeoutMillis = 1.minutes.inWholeMilliseconds
-                                requestTimeoutMillis = 1.minutes.inWholeMilliseconds
-                            }
-                        }
-                    )
+        CompositeMediaDataSource(
+            listOf(
+                MangabakaMediaDataSource(HttpClient {
+                    expectSuccess = false
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                }),
+                AniListMediaDataSource(
+                    ApolloClient.Builder()
+                        .serverUrl("https://graphql.anilist.co/")
+                        .httpEngine(
+                            KtorHttpEngine(
+                                HttpClient {
+                                    expectSuccess = false
+                                    install(HttpTimeout) {
+                                        connectTimeoutMillis = 1.minutes.inWholeMilliseconds
+                                        requestTimeoutMillis = 1.minutes.inWholeMilliseconds
+                                    }
+                                }
+                            )
+                        )
+                        .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
+                        .build()
                 )
-                .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
-                .build()
+            )
         ),
         CaffeineSessionStore<DiscordMessageReference, DiscordSession>(
             Caffeine.newBuilder()
