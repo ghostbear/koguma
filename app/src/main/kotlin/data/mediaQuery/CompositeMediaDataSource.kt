@@ -1,5 +1,10 @@
 package me.ghostbear.koguma.data.mediaQuery
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
@@ -23,8 +28,10 @@ class CompositeMediaDataSource(
             ?: MediaResult.Failure("Unsupported media type: ${mediaQuery.type}", mediaQuery)
     }
 
-    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult> {
-        return mediaQuery.map { query(it) }
+    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult>  = coroutineScope {
+        withContext(Dispatchers.IO) {
+            mediaQuery.map { async { query(it) } }.awaitAll()
+        }
     }
 
 }

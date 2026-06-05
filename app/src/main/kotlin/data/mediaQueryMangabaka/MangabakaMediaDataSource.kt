@@ -10,6 +10,7 @@ import io.ktor.http.encodedPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
@@ -24,16 +25,16 @@ class MangabakaMediaDataSource(private val httpClient: HttpClient) : MediaDataSo
     }
 
     override suspend fun query(mediaQuery: MediaQuery): MediaResult {
-        return _query(mediaQuery)
+        return internalQuery(mediaQuery)
     }
 
-    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult> {
-        return withContext(Dispatchers.IO) {
+    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult>  = coroutineScope {
+        withContext(Dispatchers.IO) {
             mediaQuery.map { async { query(it) } }.awaitAll()
         }
     }
 
-    private suspend fun _query(mediaQuery: MediaQuery): MediaResult {
+    internal suspend fun internalQuery(mediaQuery: MediaQuery): MediaResult {
         require(mediaQuery.type in SuppoertedMediaTypes) { "MangaBaka only supports manga and novel" }
         val response = try {
             httpClient.get {

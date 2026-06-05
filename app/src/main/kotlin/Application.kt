@@ -1,8 +1,11 @@
 package me.ghostbear.koguma
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
-import com.apollographql.apollo.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
+import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.ktor.http.KtorHttpEngine
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.RemovalCause
@@ -21,9 +24,10 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
 import me.ghostbear.koguma.data.mediaQuery.CompositeMediaDataSource
+import me.ghostbear.koguma.data.mediaQuery.aniList.cache.Cache
 import me.ghostbear.koguma.data.mediaQueryAnilist.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryMangabaka.MangabakaMediaDataSource
-import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
+import me.ghostbear.koguma.data.mediaQueryMatch.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.ext.safely
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
@@ -79,12 +83,22 @@ suspend fun main() {
                                 }
                             )
                         )
-                        .normalizedCache(MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds))
+                        .normalizedCache(
+                            normalizedCacheFactory = MemoryCacheFactory(50 * 1024 * 1024, 5.minutes.inWholeMilliseconds),
+                            cacheKeyGenerator = TypePolicyCacheKeyGenerator(
+                                typePolicies = Cache.typePolicies,
+                                keyScope = CacheKey.Scope.SERVICE
+                            ),
+                            cacheResolver = FieldPolicyCacheResolver(
+                                keyScope = CacheKey.Scope.SERVICE,
+                                fieldPolicies = Cache.fieldPolicies
+                            )
+                        )
                         .build()
                 )
             )
         ),
-        CaffeineSessionStore<DiscordMessageReference, DiscordSession>(
+        CaffeineSessionStore(
             Caffeine.newBuilder()
                 .expireAfterWrite(5.minutes.toJavaDuration())
                 .maximumSize(64)
@@ -108,7 +122,7 @@ suspend fun main() {
                         }
                     }
                 }
-                .build<DiscordMessageReference, DiscordSession>()
+                .build()
         )
     )
 

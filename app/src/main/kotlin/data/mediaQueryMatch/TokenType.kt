@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryParser
+package me.ghostbear.koguma.data.mediaQueryMatch
 
 enum class TokenType {
     LEFT_DOUBLE_BRACES, RIGHT_DOUBLE_BRACES,

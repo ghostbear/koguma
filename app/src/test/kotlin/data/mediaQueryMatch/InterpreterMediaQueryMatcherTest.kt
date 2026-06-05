@@ -1,14 +1,7 @@
 package data.mediaQueryMatch
 
-import kotlin.test.expect
-import me.ghostbear.koguma.data.mediaQueryParser.Expr
-import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatch
-import me.ghostbear.koguma.data.mediaQueryParser.InterpreterMediaQueryMatcher
-import me.ghostbear.koguma.data.mediaQueryParser.TokenType
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
-import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryResults
-import org.junit.jupiter.api.Assertions.*
+import me.ghostbear.koguma.data.mediaQueryMatch.InterpreterMediaQueryMatcher
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InterpreterMediaQueryMatcherTest {

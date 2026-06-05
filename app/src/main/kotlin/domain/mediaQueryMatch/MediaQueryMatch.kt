@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.mediaQueryParser
+package me.ghostbear.koguma.domain.mediaQueryMatch
 
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
 

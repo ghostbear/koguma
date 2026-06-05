@@ -13,9 +13,10 @@ import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageUpdateEvent
+import dev.kord.rest.builder.component.ComponentContainerBuilder
+import dev.kord.rest.builder.component.actionRow
 import dev.kord.rest.builder.interaction.string
 import dev.kord.rest.builder.message.MessageBuilder
-import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.embed
 import io.sentry.Sentry
@@ -31,7 +32,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
-import me.ghostbear.koguma.domain.mediaQueryParser.MediaQueryMatcher
+import me.ghostbear.koguma.domain.mediaQueryMatch.MediaQueryMatcher
 import me.ghostbear.koguma.ext.createOrEditReply
 import me.ghostbear.koguma.ext.deleteOwnReactions
 import me.ghostbear.koguma.ext.nsfw
@@ -370,13 +371,13 @@ fun MessageBuilder.embed(media: Media) {
                     MediaStatus.HIATUS -> "Hiatus"
                     null -> null
                 },
-                media.startDate?.format(LocalDate.Format { year(); char('/'); monthNumber(); char('/'); dayOfMonth() }),
+                media.startDate?.format(LocalDate.Format { year(); char('/'); monthNumber(); char('/'); day() }),
             ).joinToString(" - ")
         }
     }
 }
 
-fun MessageBuilder.actionRow(query: MediaQuery) {
+fun ComponentContainerBuilder.actionRow(query: MediaQuery) {
     actionRow {
         interactionButton(ButtonStyle.Primary, "previous") {
             disabled = query.currentPage <= 1

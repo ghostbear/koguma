@@ -44,7 +44,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.apollo.runtime)
-    implementation(libs.apollo.normalized.cache)
+    implementation(libs.apollo.normalizedCache)
     implementation(libs.apollo.ktor.engine)
     testImplementation(libs.kotlin.test.junit5)
 }
@@ -84,5 +84,8 @@ apollo {
             endpointUrl.set("https://graphql.anilist.co/")
             schemaFile.set(file("src/main/graphql/schema.graphqls"))
         }
+
+        plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin:1.0.3")
+        pluginArgument("com.apollographql.cache.packageName", packageName.get())
     }
 }

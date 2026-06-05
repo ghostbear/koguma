@@ -2,9 +2,9 @@ package data.mediaQueryMatch
 
 import kotlin.test.Test
 import kotlin.test.expect
-import me.ghostbear.koguma.data.mediaQueryParser.Scanner
-import me.ghostbear.koguma.data.mediaQueryParser.Token
-import me.ghostbear.koguma.data.mediaQueryParser.TokenType
+import me.ghostbear.koguma.data.mediaQueryMatch.Scanner
+import me.ghostbear.koguma.data.mediaQueryMatch.Token
+import me.ghostbear.koguma.data.mediaQueryMatch.TokenType
 
 class ScannerTest {
 

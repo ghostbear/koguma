@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryParser
+package me.ghostbear.koguma.data.mediaQueryMatch
 
 data class Token(
     val type: TokenType,

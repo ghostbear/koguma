@@ -25,26 +25,17 @@ class AniListMediaDataSource(
     }
 
     override suspend fun query(mediaQuery: MediaQuery): MediaResult = trace("anilist", "query") {
-        val response = _query(mediaQuery)
+        val response = internalQuery(mediaQuery)
 
         if (response.errors != null && response.errors!!.isNotEmpty()) {
             return MediaResult.Failure(response.errors!!.joinToString(separator = ",") { it.message }, mediaQuery)
         }
 
-        val page = response.data?.page
-        if (page == null) {
-            return MediaResult.Failure("Missing page", mediaQuery)
-        }
+        val page = response.data?.page ?: return MediaResult.Failure("Missing page", mediaQuery)
 
-        val pageInfo = page.pageInfo
-        if (pageInfo == null) {
-            return MediaResult.Failure("Missing page info", mediaQuery)
-        }
+        val pageInfo = page.pageInfo ?: return MediaResult.Failure("Missing page info", mediaQuery)
 
-        val mediaOrNull = page.media?.firstOrNull()
-        if (mediaOrNull == null) {
-            return MediaResult.NotFound(mediaQuery)
-        }
+        val mediaOrNull = page.media?.firstOrNull() ?: return MediaResult.NotFound(mediaQuery)
 
         return MediaResult.Success(
             AniListMedia(mediaOrNull),
@@ -59,7 +50,7 @@ class AniListMediaDataSource(
         }
     }
 
-    internal suspend fun _query(mediaQuery: MediaQuery): ApolloResponse<SearchMediaQuery.Data> {
+    internal suspend fun internalQuery(mediaQuery: MediaQuery): ApolloResponse<SearchMediaQuery.Data> {
         val formatIn: List<MediaFormat>? = when (mediaQuery.type) {
             MediaType.ANIME -> null
             MediaType.MANGA -> listOf(MediaFormat.MANGA, MediaFormat.ONE_SHOT)

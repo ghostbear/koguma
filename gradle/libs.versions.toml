@@ -15,6 +15,7 @@ config = "1.4.9"
 logback = "1.5.34"
 sentry = "6.10.0"
 apollo = "5.0.0"
+apollo-normalizedCache = "1.0.3"
 apollo-ktor-engine = "0.1.1"
 versions = "0.54.0"
 
@@ -38,7 +39,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 config = { module = "com.typesafe:config", version.ref = "config" }
 apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollo" }
-apollo-normalized-cache = { module = "com.apollographql.apollo:apollo-normalized-cache", version.ref = "apollo" }
+apollo-normalizedCache = { module = "com.apollographql.cache:normalized-cache", version.ref = "apollo-normalizedCache" }
 apollo-ktor-engine = { module = "com.apollographql.ktor:apollo-engine-ktor", version.ref = "apollo-ktor-engine" }
 
 [bundles]

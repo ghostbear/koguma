@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.mediaQueryParser
+package me.ghostbear.koguma.domain.mediaQueryMatch
 
 interface MediaQueryMatcher {
     fun match(query: String): MediaQueryResults
