@@ -11,6 +11,10 @@ plugins {
 
 kotlin {
     jvmToolchain(21)
+
+    compilerOptions {
+        optIn.add("kotlinx.serialization.ExperimentalSerializationApi")
+    }
 }
 
 tasks.withType<Test>().configureEach {
