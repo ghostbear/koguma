@@ -18,4 +18,4 @@ plugins {
 
 include(":app")
 
-rootProject.name = "kogumaz"
+rootProject.name = "koguma"
