@@ -1,11 +1,7 @@
-package data.mediaQueryMatch
+package me.ghostbear.koguma.data.mediaQueryMatch
 
 import kotlin.test.Test
 import kotlin.test.expect
-import me.ghostbear.koguma.data.mediaQueryMatch.Expr
-import me.ghostbear.koguma.data.mediaQueryMatch.Parser
-import me.ghostbear.koguma.data.mediaQueryMatch.Token
-import me.ghostbear.koguma.data.mediaQueryMatch.TokenType
 import org.junit.jupiter.api.Disabled
 
 class ParserTest {
