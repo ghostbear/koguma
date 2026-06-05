@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.sentry.jvm)
     alias(libs.plugins.apollo)
+    alias(libs.plugins.versions)
     application
 }
 
@@ -52,6 +53,10 @@ sentry {
 }
 
 tasks.named("generateSentryBundleIdJava") {
+    mustRunAfter(tasks.named("generateAniListApolloSources"))
+}
+
+tasks.named("sentryCollectSourcesJava") {
     mustRunAfter(tasks.named("generateAniListApolloSources"))
 }
 
