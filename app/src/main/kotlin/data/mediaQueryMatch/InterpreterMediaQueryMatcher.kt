@@ -6,6 +6,7 @@ import me.ghostbear.koguma.ext.trace
 
 class InterpreterMediaQueryMatcher : MediaQueryMatcher {
     override fun match(query: String): MediaQueryResults = trace("matcher", "match") {
+        if (!query.contains("<<") && !query.contains("[[") && !query.contains("{{")) return MediaQueryResults(emptyList())
         val scanner = Scanner(query)
         val tokens = scanner.scanTokens()
         val expression = Parser(tokens).expression()
