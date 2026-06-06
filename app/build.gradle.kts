@@ -2,11 +2,17 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.allOpen)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.kotlinx.benchmark)
     alias(libs.plugins.sentry.jvm)
     alias(libs.plugins.apollo)
     alias(libs.plugins.versions)
     application
+}
+
+sourceSets {
+    create("benchmark")
 }
 
 kotlin {
@@ -14,6 +20,21 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlinx.serialization.ExperimentalSerializationApi")
+    }
+
+    target {
+        compilations.getByName("benchmark")
+            .associateWith(compilations.getByName("main"))
+    }
+}
+
+allOpen {
+    annotation("org.openjdk.jmh.annotations.State")
+}
+
+benchmark {
+    targets {
+        register("benchmark")
     }
 }
 
@@ -47,6 +68,7 @@ dependencies {
     implementation(libs.apollo.normalizedCache)
     implementation(libs.apollo.ktor.engine)
     testImplementation(libs.kotlin.test.junit5)
+    benchmarkImplementation(libs.kotlinx.benchmarkRuntime)
 }
 
 sentry {
@@ -89,3 +111,5 @@ apollo {
         pluginArgument("com.apollographql.cache.packageName", packageName.get())
     }
 }
+
+fun DependencyHandler.benchmarkImplementation(dependencyNotation: Any) = add("benchmarkImplementation", dependencyNotation)
