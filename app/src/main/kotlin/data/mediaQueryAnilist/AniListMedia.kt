@@ -6,6 +6,7 @@ import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaSeason
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaStatus
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.MediaLink
 import me.ghostbear.koguma.domain.mediaQuery.Media as DomainMedia
 import me.ghostbear.koguma.domain.mediaQuery.MediaSeason as DomainMediaSeason
 import me.ghostbear.koguma.domain.mediaQuery.MediaType as DomainMediaType
@@ -18,8 +19,10 @@ class AniListMedia(
 
     override val id: Long
         get() = media.id.toLong()
-    override val url: String
-        get() = media.siteUrl ?: "https://anilist.co/${type?.name?.lowercase()}/${id}"
+    override val links: List<MediaLink>
+        get() = buildList {
+            add(MediaLink(MediaLink.Id.AniList, media.siteUrl ?: "https://anilist.co/${type?.name?.lowercase()}/${id}", true))
+        }
     override val title: String
         get() = media.title?.userPreferred ?: "Untitled"
     override val description: String?

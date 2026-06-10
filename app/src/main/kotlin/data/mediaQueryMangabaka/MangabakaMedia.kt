@@ -2,6 +2,7 @@ package me.ghostbear.koguma.data.mediaQueryMangabaka
 
 import kotlinx.datetime.LocalDate
 import me.ghostbear.koguma.domain.mediaQuery.MediaFormat
+import me.ghostbear.koguma.domain.mediaQuery.MediaLink
 import me.ghostbear.koguma.domain.mediaQuery.MediaSeason
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
@@ -12,8 +13,33 @@ class MangabakaMedia(
 ) : DomainMedia {
     override val id: Long
         get() = value.id.toLong()
-    override val url: String
-        get() = "https://mangabaka.org/${id}"
+    override val links: List<MediaLink>
+        get() = buildList {
+            add(MediaLink(MediaLink.Id.MangaBaka, "https://mangabaka.org/${id}", true))
+
+            val source = value.source
+            if (source.anilist.id != null) {
+                add(MediaLink(MediaLink.Id.AniList, "https://anilist.co/manga/${source.anilist.id}", false))
+            }
+            if (source.kitsu.id != null) {
+                add(MediaLink(MediaLink.Id.Kitsu, "https://kitsu.io/manga/${source.kitsu.id}", false))
+            }
+            if (source.myAnimeList.id != null) {
+                add(MediaLink(MediaLink.Id.MyAnimeList, "https://myanimelist.net/manga/${source.myAnimeList.id}", false))
+            }
+            if (source.mangaUpdates.id != null) {
+                add(MediaLink(MediaLink.Id.MangaUpdates, "https://mangaupdates.com/series.html?id=${source.mangaUpdates.id}", false))
+            }
+            if (source.animePlanet.id != null) {
+                add(MediaLink(MediaLink.Id.AnimePlanet, "https://www.anime-planet.com/manga/${source.animePlanet.id}", false))
+            }
+            if (source.animeNewsNetwork.id != null) {
+                add(MediaLink(MediaLink.Id.AnimeNewsNetwork, "https://www.animenewsnetwork.com/encyclopedia/manga.php?id=${source.animeNewsNetwork.id}", false))
+            }
+            if (source.shikimori.id != null) {
+                add(MediaLink(MediaLink.Id.Shikimori, "https://shikimori.one/manga/${source.shikimori.id}", false))
+            }
+        }
     override val title: String
         get() = value.titles
             ?.filter {

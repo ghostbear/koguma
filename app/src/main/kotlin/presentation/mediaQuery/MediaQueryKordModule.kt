@@ -7,6 +7,7 @@ import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.interaction.updatePublicMessage
+import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
@@ -29,6 +30,7 @@ import me.ghostbear.koguma.di.KordModule
 import me.ghostbear.koguma.domain.mediaQuery.Media
 import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.MediaFormat
+import me.ghostbear.koguma.domain.mediaQuery.MediaLink
 import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
@@ -286,6 +288,38 @@ val defaultBuilder: MessageBuilder.() -> Unit = {
 val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
     get() = {
         embed(media)
+        if (media.links.any { !it.isPrimary }) {
+            media.links
+                .filter { !it.isPrimary }
+                .windowed(3, 3, partialWindows = true).forEach {
+                actionRow {
+                    it.forEach { link ->
+                        linkButton(link.url) {
+                            label = when (link.id) {
+                                MediaLink.Id.AniList -> "AniList"
+                                MediaLink.Id.MyAnimeList -> "MyAnimeList"
+                                MediaLink.Id.Kitsu -> "Kitsu"
+                                MediaLink.Id.MangaUpdates -> "MangaUpdates"
+                                MediaLink.Id.AnimePlanet -> "AnimePlanet"
+                                MediaLink.Id.AnimeNewsNetwork -> "AnimeNewsNetwork"
+                                MediaLink.Id.Shikimori -> "Shikimori"
+                                else -> link.id.id.uppercase()
+                            }
+                            when (link.id) {
+                                MediaLink.Id.AniList -> emoji(ReactionEmoji.Unicode("\uD83C\uDF38"))
+                                MediaLink.Id.MyAnimeList -> emoji(ReactionEmoji.Unicode("\uD83D\uDCDD"))
+                                MediaLink.Id.Kitsu -> emoji(ReactionEmoji.Unicode("\uD83E\uDD8A"))
+                                MediaLink.Id.MangaUpdates -> emoji(ReactionEmoji.Unicode("\uD83D\uDD14"))
+                                MediaLink.Id.AnimePlanet -> emoji(ReactionEmoji.Unicode("\uD83E\uDE90"))
+                                MediaLink.Id.AnimeNewsNetwork -> emoji(ReactionEmoji.Unicode("\uD83D\uDCF0"))
+                                MediaLink.Id.Shikimori -> emoji(ReactionEmoji.Unicode("⛩\uFE0F"))
+                                else -> {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
         actionRow(mediaQuery)
     }
 

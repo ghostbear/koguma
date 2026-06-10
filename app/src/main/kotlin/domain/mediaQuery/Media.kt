@@ -5,6 +5,9 @@ import kotlinx.datetime.LocalDate
 interface Media {
     val id: Long
     val url: String
+        get() = links.find { it.isPrimary }?.url ?: ""
+    val links: List<MediaLink>
+        get() = emptyList()
     val title: String
     val description: String?
     val thumbnailUrl: String?
