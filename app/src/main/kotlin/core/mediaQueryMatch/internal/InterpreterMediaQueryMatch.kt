@@ -1,6 +1,6 @@
 package me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch
 
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
 import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryMatch
 
 class InterpreterMediaQueryMatch(private val expr: Expr) : MediaQueryMatch {

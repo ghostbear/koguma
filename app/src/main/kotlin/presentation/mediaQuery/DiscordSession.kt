@@ -1,6 +1,6 @@
 package me.ghostbear.koguma.presentation.mediaQuery
 
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaQuery
 
 sealed interface DiscordSession {
     class Interaction(val mediaQuery: MediaQuery) : DiscordSession

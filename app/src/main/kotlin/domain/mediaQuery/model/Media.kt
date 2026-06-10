@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.mediaQuery
+package me.ghostbear.koguma.domain.mediaQuery.model
 
 import kotlinx.datetime.LocalDate
 

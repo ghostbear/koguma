@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryMangabaka
+package me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.KSerializer
@@ -26,7 +26,7 @@ enum class MangabakaStatus(private val code: Int) {
     companion object Serializer : EnumAsIntSerializer<MangabakaStatus>(
         "MangabakaStatus",
         { e -> e.code },
-        { v -> MangabakaStatus.entries.first { e -> e.code == v } }
+        { v -> entries.first { e -> e.code == v } }
     )
 }
 
@@ -113,13 +113,13 @@ enum class MangabakaMediaTitleTrait {
 @Serializable
 @JsonIgnoreUnknownKeys
 data class MangabakaMediaCover(
-    val raw: MangabakaMediaCover.Raw,
+    val raw: Raw,
     @SerialName("x150")
-    val small: MangabakaMediaCover.Scaled,
+    val small: Scaled,
     @SerialName("x250")
-    val medium: MangabakaMediaCover.Scaled,
+    val medium: Scaled,
     @SerialName("x350")
-    val large: MangabakaMediaCover.Scaled,
+    val large: Scaled,
 ) {
 
     @Serializable

@@ -1,6 +1,6 @@
 package me.ghostbear.koguma.core.mediaQueryMatch
 
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
 
 interface MediaQueryMatch {
     val query: String

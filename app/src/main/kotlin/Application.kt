@@ -13,10 +13,10 @@ import org.koin.java.KoinJavaComponent.getKoin
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import kotlinx.coroutines.launch
-import me.ghostbear.koguma.data.mediaQuery.CompositeMediaDataSource
+import me.ghostbear.koguma.data.mediaQuery.dataSource.CompositeMediaDataSource
 import me.ghostbear.koguma.data.mediaQuery.aniList.cache.Cache
-import me.ghostbear.koguma.data.mediaQueryAnilist.AniListMediaDataSource
-import me.ghostbear.koguma.data.mediaQueryMangabaka.MangabakaMediaDataSource
+import me.ghostbear.koguma.data.mediaQueryAnilist.dataSource.AniListMediaDataSource
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.MangabakaMediaDataSource
 import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.ext.safely
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference

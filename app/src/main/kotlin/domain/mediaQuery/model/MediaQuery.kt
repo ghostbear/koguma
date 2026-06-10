@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.mediaQuery
+package me.ghostbear.koguma.domain.mediaQuery.model
 
 data class MediaQuery(
     val query: String,

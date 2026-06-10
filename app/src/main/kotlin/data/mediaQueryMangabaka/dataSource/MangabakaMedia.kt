@@ -1,16 +1,19 @@
-package me.ghostbear.koguma.data.mediaQueryMangabaka
+package me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource
 
 import kotlinx.datetime.LocalDate
-import me.ghostbear.koguma.domain.mediaQuery.MediaFormat
-import me.ghostbear.koguma.domain.mediaQuery.MediaLink
-import me.ghostbear.koguma.domain.mediaQuery.MediaSeason
-import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
-import me.ghostbear.koguma.domain.mediaQuery.Media as DomainMedia
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaStatus
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaType
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMedium
+import me.ghostbear.koguma.domain.mediaQuery.model.Media
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaFormat
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaLink
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaSeason
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaStatus
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
 
 class MangabakaMedia(
     private val value: MangabakaMedium
-) : DomainMedia {
+) : Media {
     override val id: Long
         get() = value.id.toLong()
     override val links: List<MediaLink>
@@ -25,16 +28,40 @@ class MangabakaMedia(
                 add(MediaLink(MediaLink.Id.Kitsu, "https://kitsu.io/manga/${source.kitsu.id}", false))
             }
             if (source.myAnimeList.id != null) {
-                add(MediaLink(MediaLink.Id.MyAnimeList, "https://myanimelist.net/manga/${source.myAnimeList.id}", false))
+                add(
+                    MediaLink(
+                        MediaLink.Id.MyAnimeList,
+                        "https://myanimelist.net/manga/${source.myAnimeList.id}",
+                        false
+                    )
+                )
             }
             if (source.mangaUpdates.id != null) {
-                add(MediaLink(MediaLink.Id.MangaUpdates, "https://mangaupdates.com/series.html?id=${source.mangaUpdates.id}", false))
+                add(
+                    MediaLink(
+                        MediaLink.Id.MangaUpdates,
+                        "https://mangaupdates.com/series.html?id=${source.mangaUpdates.id}",
+                        false
+                    )
+                )
             }
             if (source.animePlanet.id != null) {
-                add(MediaLink(MediaLink.Id.AnimePlanet, "https://www.anime-planet.com/manga/${source.animePlanet.id}", false))
+                add(
+                    MediaLink(
+                        MediaLink.Id.AnimePlanet,
+                        "https://www.anime-planet.com/manga/${source.animePlanet.id}",
+                        false
+                    )
+                )
             }
             if (source.animeNewsNetwork.id != null) {
-                add(MediaLink(MediaLink.Id.AnimeNewsNetwork, "https://www.animenewsnetwork.com/encyclopedia/manga.php?id=${source.animeNewsNetwork.id}", false))
+                add(
+                    MediaLink(
+                        MediaLink.Id.AnimeNewsNetwork,
+                        "https://www.animenewsnetwork.com/encyclopedia/manga.php?id=${source.animeNewsNetwork.id}",
+                        false
+                    )
+                )
             }
             if (source.shikimori.id != null) {
                 add(MediaLink(MediaLink.Id.Shikimori, "https://shikimori.one/manga/${source.shikimori.id}", false))

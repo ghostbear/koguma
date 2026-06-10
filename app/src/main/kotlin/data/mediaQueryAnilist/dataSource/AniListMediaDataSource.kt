@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryAnilist
+package me.ghostbear.koguma.data.mediaQueryAnilist.dataSource
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
@@ -10,10 +10,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
-import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.domain.mediaQuery.MediaResult
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaQuery
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaResult
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
 import me.ghostbear.koguma.ext.trace
 
 class AniListMediaDataSource(
@@ -75,4 +75,3 @@ class AniListMediaDataSource(
     }
 
 }
-

@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryMangabaka
+package me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource
 
 import dev.kord.rest.request.isError
 import io.ktor.client.HttpClient
@@ -13,10 +13,11 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
-import me.ghostbear.koguma.domain.mediaQuery.MediaDataSource
-import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
-import me.ghostbear.koguma.domain.mediaQuery.MediaResult
-import me.ghostbear.koguma.domain.mediaQuery.MediaType
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaResponse
+import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaQuery
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaResult
+import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
 
 class MangabakaMediaDataSource(private val httpClient: HttpClient) : MediaDataSource {
 
