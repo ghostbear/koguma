@@ -17,7 +17,7 @@ import me.ghostbear.koguma.data.mediaQuery.CompositeMediaDataSource
 import me.ghostbear.koguma.data.mediaQuery.aniList.cache.Cache
 import me.ghostbear.koguma.data.mediaQueryAnilist.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryMangabaka.MangabakaMediaDataSource
-import me.ghostbear.koguma.data.mediaQueryMatch.InterpreterMediaQueryMatcher
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.ext.safely
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
 import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession

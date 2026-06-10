@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.domain.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch
 
 data class MediaQueryResults(
     val matches: List<MediaQueryMatch>,

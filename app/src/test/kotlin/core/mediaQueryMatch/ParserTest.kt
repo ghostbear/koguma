@@ -1,5 +1,9 @@
-package me.ghostbear.koguma.data.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch
 
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.Expr
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.Parser
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.Token
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.TokenType
 import kotlin.test.Test
 import kotlin.test.expect
 import org.junit.jupiter.api.Disabled

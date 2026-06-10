@@ -35,7 +35,7 @@ import me.ghostbear.koguma.domain.mediaQuery.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.MediaStatus
 import me.ghostbear.koguma.domain.mediaQuery.MediaType
-import me.ghostbear.koguma.domain.mediaQueryMatch.MediaQueryMatcher
+import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryMatcher
 import me.ghostbear.koguma.ext.createOrEditReply
 import me.ghostbear.koguma.ext.deleteOwnReactions
 import me.ghostbear.koguma.ext.nsfw

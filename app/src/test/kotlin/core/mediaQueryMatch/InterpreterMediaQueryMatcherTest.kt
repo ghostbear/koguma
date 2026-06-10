@@ -1,5 +1,6 @@
-package me.ghostbear.koguma.data.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch
 
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

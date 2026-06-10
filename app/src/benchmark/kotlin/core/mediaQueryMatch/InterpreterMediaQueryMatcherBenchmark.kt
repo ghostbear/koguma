@@ -1,6 +1,7 @@
-package me.ghostbear.koguma.data.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch
 
-import me.ghostbear.koguma.domain.mediaQueryMatch.MediaQueryResults
+import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryResults
+import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Measurement

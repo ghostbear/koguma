@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.data.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch
 
 import me.ghostbear.koguma.ext.trace
 

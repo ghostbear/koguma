@@ -1,7 +1,7 @@
-package me.ghostbear.koguma.data.mediaQueryMatch
+package me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch
 
-import me.ghostbear.koguma.domain.mediaQueryMatch.MediaQueryMatcher
-import me.ghostbear.koguma.domain.mediaQueryMatch.MediaQueryResults
+import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryMatcher
+import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryResults
 import me.ghostbear.koguma.ext.trace
 
 class InterpreterMediaQueryMatcher : MediaQueryMatcher {
