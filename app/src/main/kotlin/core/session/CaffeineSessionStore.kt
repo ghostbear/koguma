@@ -1,4 +1,4 @@
-package me.ghostbear.koguma.session
+package me.ghostbear.koguma.core.session
 
 import com.github.benmanes.caffeine.cache.Cache
 

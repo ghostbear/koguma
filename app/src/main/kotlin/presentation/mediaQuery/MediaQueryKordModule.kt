@@ -41,7 +41,7 @@ import me.ghostbear.koguma.ext.deleteOwnReactions
 import me.ghostbear.koguma.ext.nsfw
 import me.ghostbear.koguma.ext.on
 import me.ghostbear.koguma.ext.takeIf
-import me.ghostbear.koguma.session.SessionStore
+import me.ghostbear.koguma.core.session.SessionStore
 
 class MediaQueryKordModule(
     private val matcher: MediaQueryMatcher,
