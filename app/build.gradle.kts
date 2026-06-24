@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.apollo.runtime)
     implementation(libs.apollo.normalizedCache)
     implementation(libs.apollo.ktor.engine)
+    implementation(libs.koin.core)
     testImplementation(libs.kotlin.test.junit5)
     benchmarkImplementation(libs.kotlinx.benchmarkRuntime)
 }

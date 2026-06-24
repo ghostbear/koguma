@@ -19,6 +19,7 @@ apollo = "5.0.0"
 apollo-normalizedCache = "1.0.3"
 apollo-ktor-engine = "0.1.1"
 versions = "0.54.0"
+koin = "4.0.3"
 
 [libraries]
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -43,6 +44,7 @@ config = { module = "com.typesafe:config", version.ref = "config" }
 apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollo" }
 apollo-normalizedCache = { module = "com.apollographql.cache:normalized-cache", version.ref = "apollo-normalizedCache" }
 apollo-ktor-engine = { module = "com.apollographql.ktor:apollo-engine-ktor", version.ref = "apollo-ktor-engine" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 [bundles]
 kotlinx = ["kotlinx-datetime", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
