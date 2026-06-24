@@ -14,7 +14,8 @@ import io.ktor.serialization.kotlinx.json.*
 import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryMatcher
 import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
 import me.ghostbear.koguma.data.mediaQuery.aniList.cache.Cache
-import me.ghostbear.koguma.data.mediaQuery.dataSource.CompositeMediaDataSource
+import me.ghostbear.koguma.data.mediaQuery.dataSource.GuildAwareMediaDataSource
+import me.ghostbear.koguma.data.mediaQuery.dataSource.GuildPreference
 import me.ghostbear.koguma.data.mediaQueryAnilist.dataSource.AniListMediaDataSource
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.MangabakaMediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
@@ -61,12 +62,18 @@ val dataModule = module {
             .build()
     }
 
+    singleOf(::GuildPreference)
+
     singleOf(::MangabakaMediaDataSource)
     singleOf(::AniListMediaDataSource)
 
     single<MediaDataSource> {
-        CompositeMediaDataSource(
-            listOf(get<MangabakaMediaDataSource>(), get<AniListMediaDataSource>())
+        GuildAwareMediaDataSource(
+            get(),
+            listOf(
+                get<MangabakaMediaDataSource>(),
+                get<AniListMediaDataSource>()
+            )
         )
     }
 

@@ -23,6 +23,7 @@ import dev.kord.rest.builder.message.embed
 import io.sentry.Sentry
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
@@ -42,6 +43,7 @@ import me.ghostbear.koguma.ext.nsfw
 import me.ghostbear.koguma.ext.on
 import me.ghostbear.koguma.ext.takeIf
 import me.ghostbear.koguma.core.session.SessionStore
+import me.ghostbear.koguma.data.mediaQuery.dataSource.GuildIdContext
 
 class MediaQueryKordModule(
     private val matcher: MediaQueryMatcher,
@@ -78,8 +80,9 @@ class MediaQueryKordModule(
                 }
 
                 val channel = interaction.channel.asChannel()
-                val result = dataSource.query(MediaQuery(query, type, channel.nsfw))
-
+                val result = withContext(GuildIdContext(interaction.data.guildId.value)) {
+                    dataSource.query(MediaQuery(query, type, channel.nsfw))
+                }
                 Sentry.configureScope { scope ->
                     scope.setExtra("query", query)
                     scope.setExtra("type", type.name)
@@ -116,6 +119,7 @@ class MediaQueryKordModule(
 
         on<ButtonInteractionCreateEvent> {
             Sentry.addBreadcrumb("${interaction.message.channelId.value}-${interaction.message.id.value}")
+
             val componentId = interaction.componentId
 
             interaction.message.deleteOwnReactions()
@@ -137,7 +141,7 @@ class MediaQueryKordModule(
                 }
                 val query = mediaQuery.copy(currentPage = mediaQuery.currentPage + direction)
 
-                val result = dataSource.query(query)
+                val result = withContext(GuildIdContext(interaction.data.guildId.value)){ dataSource.query(query) }
                 when (result) {
                     is MediaResult.Failure -> {
                         interaction.message.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
@@ -185,7 +189,9 @@ class MediaQueryKordModule(
                 val channel = asChannel()
                 val queries = matches.map { MediaQuery(it.query, it.type, channel.nsfw, it.page) }.toTypedArray()
 
-                val results = dataSource.query(*queries)
+                val results = withContext(GuildIdContext(message.getGuildOrNull()?.id)) {
+                    dataSource.query(*queries)
+                }
 
                 val channelId = activeSessionOrNull?.replyReference?.channelId ?: id
                 val replyMessageId = activeSessionOrNull?.replyReference?.messageId
@@ -265,12 +271,20 @@ class MediaQueryKordModule(
 
         on<MessageCreateEvent> {
             Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
-            process(message)
+            val guild = message.getGuildOrNull()
+
+            withContext(GuildIdContext(guild?.id)){
+                process(message)
+            }
         }
 
         on<MessageUpdateEvent> {
             Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
-            process(getMessage())
+            val message = getMessage()
+            val guild = message.getGuildOrNull()
+            withContext(GuildIdContext(guild?.id)){
+                process(message)
+            }
         }
     }
 
