@@ -8,7 +8,6 @@ import me.ghostbear.koguma.data.dataModule
 import me.ghostbear.koguma.di.KordContext
 import me.ghostbear.koguma.domain.domainModule
 import me.ghostbear.koguma.presentation.presentationModule
-import me.ghostbear.koguma.session.sessionModule
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.scope.Scope
 import org.koin.core.scope.ScopeCallback
@@ -18,7 +17,6 @@ val applicationModule = module {
     includes(
         domainModule,
         dataModule,
-        sessionModule,
         presentationModule,
     )
 

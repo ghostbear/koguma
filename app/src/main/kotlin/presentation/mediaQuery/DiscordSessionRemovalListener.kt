@@ -10,6 +10,9 @@ class DiscordSessionRemovalListener(
     private val scope: CoroutineScope,
     private val context: KordContext,
 ) : RemovalListener<DiscordMessageReference, DiscordSession> {
+
+    private val rest by lazy { context.rest }
+
     override fun onRemoval(
         id: DiscordMessageReference?,
         session: DiscordSession?,
@@ -17,17 +20,16 @@ class DiscordSessionRemovalListener(
     ) {
         if (cause == RemovalCause.REPLACED) return
         scope.launch {
-            val kord = context.kord
             when {
                 session is DiscordSession.Message -> {
                     val (messageId, channelId) = session.replyReference
-                    kord.rest.channel.editMessage(channelId, messageId) {
+                    rest.channel.editMessage(channelId, messageId) {
                         components = mutableListOf()
                     }
                 }
                 else -> {
                     val (messageId, channelId) = id ?: return@launch
-                    kord.rest.channel.editMessage(channelId, messageId) {
+                    rest.channel.editMessage(channelId, messageId) {
                         components = mutableListOf()
                     }
                 }
