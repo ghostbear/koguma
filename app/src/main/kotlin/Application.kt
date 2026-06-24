@@ -10,19 +10,6 @@ import me.ghostbear.koguma.di.KordContext
 import me.ghostbear.koguma.di.KordModule
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.toJavaDuration
-import kotlinx.coroutines.launch
-import me.ghostbear.koguma.data.mediaQuery.dataSource.CompositeMediaDataSource
-import me.ghostbear.koguma.data.mediaQuery.aniList.cache.Cache
-import me.ghostbear.koguma.data.mediaQueryAnilist.dataSource.AniListMediaDataSource
-import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.MangabakaMediaDataSource
-import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
-import me.ghostbear.koguma.ext.safely
-import me.ghostbear.koguma.presentation.mediaQuery.DiscordMessageReference
-import me.ghostbear.koguma.presentation.mediaQuery.DiscordSession
-import me.ghostbear.koguma.presentation.mediaQuery.mediaQueryModule
-import me.ghostbear.koguma.core.session.CaffeineSessionStore
 
 suspend fun main() {
     Sentry.init { options ->

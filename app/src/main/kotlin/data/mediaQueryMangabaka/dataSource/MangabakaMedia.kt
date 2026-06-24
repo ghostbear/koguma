@@ -4,12 +4,7 @@ import kotlinx.datetime.LocalDate
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaStatus
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaType
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMedium
-import me.ghostbear.koguma.domain.mediaQuery.model.Media
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaFormat
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaLink
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaSeason
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaStatus
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.model.*
 
 class MangabakaMedia(
     private val value: MangabakaMedium

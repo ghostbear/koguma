@@ -3,11 +3,7 @@ package me.ghostbear.koguma.data.mediaQueryAnilist.dataSource
 import kotlinx.datetime.LocalDate
 import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
-import me.ghostbear.koguma.domain.mediaQuery.model.Media
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaLink
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaSeason
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaStatus
-import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
+import me.ghostbear.koguma.domain.mediaQuery.model.*
 
 class AniListMedia(
     val media: SearchMediaQuery.Data.Page.Medium

@@ -3,11 +3,7 @@ package me.ghostbear.koguma.data.mediaQueryAnilist.dataSource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Optional
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import me.ghostbear.koguma.data.mediaQuery.aniList.SearchMediaQuery
 import me.ghostbear.koguma.data.mediaQuery.aniList.type.MediaFormat
 import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
