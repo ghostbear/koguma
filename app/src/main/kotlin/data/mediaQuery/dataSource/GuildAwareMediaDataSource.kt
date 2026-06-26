@@ -1,7 +1,12 @@
 package me.ghostbear.koguma.data.mediaQuery.dataSource
 
 import dev.kord.common.entity.Snowflake
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.withContext
 import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.model.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.model.MediaResult
@@ -48,13 +53,17 @@ class GuildAwareMediaDataSource(
     override suspend fun query(mediaQuery: MediaQuery): MediaResult {
         val guildId = currentGuildIdOrNull()
 
-        return dataSources.getOrDefault(guildId, defaultDataSource).query(mediaQuery)
+        val dataSource = dataSources.getOrDefault(guildId, defaultDataSource)
+        if (!dataSource.isSupported(mediaQuery.type)) {
+            return defaultDataSource.query(mediaQuery)
+        }
+        return dataSource.query(mediaQuery)
     }
 
-    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult> {
-        val guildId = currentGuildIdOrNull()
-
-        return dataSources.getOrDefault(guildId, defaultDataSource).query(*mediaQuery)
+    override suspend fun query(vararg mediaQuery: MediaQuery): List<MediaResult> = coroutineScope {
+        withContext(Dispatchers.IO) {
+            mediaQuery.map { async { query(it) } }.awaitAll()
+        }
     }
 
 
