@@ -46,6 +46,7 @@ import me.ghostbear.koguma.core.session.SessionStore
 import me.ghostbear.koguma.data.mediaQuery.dataSource.GuildIdContext
 
 class MediaQueryKordModule(
+    private val preference: MediaQueryPreference,
     private val matcher: MediaQueryMatcher,
     private val dataSource: MediaDataSource,
     private val sessionStore: SessionStore<DiscordMessageReference, DiscordSession>
@@ -91,7 +92,7 @@ class MediaQueryKordModule(
 
                 when (result) {
                     is MediaResult.Success -> {
-                        val message = deferredResponse.respond(result.messageBuilder)
+                        val message = deferredResponse.respond(context(preference) { result.messageBuilder })
                         sessionStore.put(message.message.reference(), DiscordSession.Interaction(result.mediaQuery))
                     }
 
@@ -156,7 +157,7 @@ class MediaQueryKordModule(
                     }
 
                     is MediaResult.Success -> {
-                        interaction.updatePublicMessage(result.messageBuilder)
+                        interaction.updatePublicMessage(context(preference) { result.messageBuilder })
                         sessionStore.put(sessionId, DiscordSession.Interaction(result.mediaQuery))
                     }
                 }
@@ -204,7 +205,8 @@ class MediaQueryKordModule(
                     result is MediaResult.Success -> {
                         message.createOrEditReply(channelId, replyMessageId, referenceMessageId) {
                             defaultBuilder()
-                            result.messageBuilder(this)
+
+                            context(preference) { result.messageBuilder(this) }
                         }
                     }
 
@@ -299,12 +301,14 @@ val defaultBuilder: MessageBuilder.() -> Unit = {
     }
 }
 
+context(preference: MediaQueryPreference)
 val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
     get() = {
         embed(media)
         if (media.links.any { !it.isPrimary }) {
             media.links
                 .filter { !it.isPrimary }
+                .filter { preference.availableMediaLinkIds.contains(it.id) }
                 .windowed(3, 3, partialWindows = true).forEach {
                 actionRow {
                     it.forEach { link ->

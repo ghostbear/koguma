@@ -27,11 +27,12 @@ val mediaQueryPresentationModule = module {
         CaffeineSessionStore(get(MediaQueryCaffeine))
     }
 
-
     singleOf(::DiscordSessionRemovalListener)
 
+    singleOf(::MediaQueryPreference)
+
     single<KordModule> {
-        MediaQueryKordModule(get(), get(), get(MediaQuerySessionStore))
+        MediaQueryKordModule(get(),get(), get(), get(MediaQuerySessionStore))
     }
 
 }

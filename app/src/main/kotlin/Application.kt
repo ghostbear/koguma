@@ -48,7 +48,7 @@ suspend fun main() {
 
     kord.login {
         presence {
-            watching("\uD83D\uDCFA the honey drip out of the jar")
+            watching("\uD83D\uDCFA the honey drip out of the JAR")
         }
         @OptIn(PrivilegedIntent::class)
         intents += Intent.MessageContent
