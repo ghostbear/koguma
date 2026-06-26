@@ -19,7 +19,7 @@ apollo = "5.0.0"
 apollo-normalizedCache = "1.0.3"
 apollo-ktor-engine = "0.1.1"
 versions = "0.54.0"
-koin = "4.0.3"
+koin = "4.2.2"
 
 [libraries]
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
