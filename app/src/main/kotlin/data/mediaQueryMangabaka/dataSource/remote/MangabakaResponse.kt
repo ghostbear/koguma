@@ -64,9 +64,11 @@ data class MangabakaMedium(
     val type: MangabakaMediaType,
     val titles: List<MangabakaMediaTitle>?,
     val description: String?,
+    val rating: Double?,
     val cover: MangabakaMediaCover?,
     @SerialName("genres_v2")
-    val genres: List<MangabakaMediaGenre>?,
+    val genresV2: List<MangabakaMediaGenre>?,
+    val genres: List<String>?,
     @SerialName("total_chapters")
     val totalChapters: String?,
     val source: MangabakaMediaSource,

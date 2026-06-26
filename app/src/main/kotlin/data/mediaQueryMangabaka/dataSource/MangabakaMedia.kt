@@ -5,6 +5,7 @@ import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaM
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaType
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMedium
 import me.ghostbear.koguma.domain.mediaQuery.model.*
+import kotlin.math.roundToInt
 
 class MangabakaMedia(
     private val value: MangabakaMedium
@@ -90,7 +91,10 @@ class MangabakaMedia(
             ?: value.cover?.small?.medium
             ?: value.cover?.small?.small
     override val imageUrl: String? = null
-    override val type: MediaType? = MediaType.MANGA
+    override val type: MediaType? = when (value.type) {
+        MangabakaMediaType.NOVEL -> MediaType.NOVEL
+        else -> MediaType.MANGA
+    }
     override val format: MediaFormat?
         get() = when (value.type) {
             MangabakaMediaType.MANGA -> MediaFormat.MANGA
@@ -114,19 +118,19 @@ class MangabakaMedia(
     override val season: MediaSeason? = null
     override val startDate: LocalDate?
         get() = value.published.startDate
-    override val meanScore: Double? = null
+    override val meanScore: Double? = value.rating?.times(10.0)?.roundToInt()?.div(10.0)
     override val genres: List<String>?
-        get() = value.genres?.map { it.name }
+        get() = (value.genresV2?.map { it.name } ?: value.genres)?.map { it.replaceFirstChar(Char::titlecase) }
     override val episodeCount: Int? = null
     override val chapterCount: Int?
         get() = value.totalChapters?.toIntOrNull()
     override val color: Int?
         get() = when (value.type) {
-            MangabakaMediaType.MANGA -> 0xFF0000
-            MangabakaMediaType.NOVEL -> 0xFF0000
-            MangabakaMediaType.MANWHA -> 0xFF0000
-            MangabakaMediaType.MANHUA -> 0xFF0000
-            MangabakaMediaType.OEL -> 0xFF0000
-            MangabakaMediaType.OTHER -> 0xFF0000
+            MangabakaMediaType.MANGA -> 0xe32636
+            MangabakaMediaType.NOVEL -> 0x5d8aa8
+            MangabakaMediaType.MANWHA -> 0xffbf00
+            MangabakaMediaType.MANHUA -> 0xa4c639
+            MangabakaMediaType.OEL -> 0x9966cc
+            MangabakaMediaType.OTHER -> 0xf2f3f4
         }
 }
