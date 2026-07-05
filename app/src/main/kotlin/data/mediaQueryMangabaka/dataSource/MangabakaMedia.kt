@@ -2,6 +2,7 @@ package me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource
 
 import kotlinx.datetime.LocalDate
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaStatus
+import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaTitleTrait
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMediaType
 import me.ghostbear.koguma.data.mediaQueryMangabaka.dataSource.remote.MangabakaMedium
 import me.ghostbear.koguma.domain.mediaQuery.model.*
@@ -64,19 +65,20 @@ class MangabakaMedia(
             }
         }
     override val title: String
-        get() = value.titles
-            ?.filter {
-                it.language == "en"
-                        || it.language == "ja"
-                        || it.language == "jp-Latn"
-                        || it.language == "ko"
-                        || it.language == "ko-Latn"
-                        || it.language == "zh"
-                        || it.language == "zh-hk"
-                        || it.language == "zh-Latn"
-            }
-            ?.find { it.isPrimary == true }
-            ?.title ?: "Unknown title"
+        get() {
+            return value.titles
+                ?.filter { it.isPrimary == true && (it.traits.any { trait -> trait ==  MangabakaMediaTitleTrait.NATIVE || trait == MangabakaMediaTitleTrait.OFFICIAL }) }
+                ?.minByOrNull { title ->
+                    when {
+                        MangabakaMediaTitleTrait.NATIVE in title.traits && title.language.endsWith("Latn") -> 0
+                        title.language == "en" -> 1
+                        MangabakaMediaTitleTrait.NATIVE in title.traits -> 2
+                        else -> 3
+                    }
+                }
+                ?.title
+                ?: "Unknown title"
+        }
     override val description: String?
         get() = value.description
     override val thumbnailUrl: String?
