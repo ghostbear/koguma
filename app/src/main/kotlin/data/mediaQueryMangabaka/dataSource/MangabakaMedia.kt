@@ -120,7 +120,11 @@ class MangabakaMedia(
         get() = value.published.startDate
     override val meanScore: Double? = value.rating?.times(10.0)?.roundToInt()?.div(10.0)
     override val genres: List<String>?
-        get() = (value.genresV2?.map { it.name } ?: value.genres)?.map { it.replaceFirstChar(Char::titlecase) }
+        get() = (value.genresV2?.map { it.name } ?: value.genres)
+            ?.map {
+                it.replace('_', ' ')
+                    .replaceFirstChar(Char::titlecase)
+            }
     override val episodeCount: Int? = null
     override val chapterCount: Int?
         get() = value.totalChapters?.toIntOrNull()
