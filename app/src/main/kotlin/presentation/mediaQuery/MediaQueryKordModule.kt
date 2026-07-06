@@ -142,7 +142,7 @@ class MediaQueryKordModule(
                 }
                 val query = mediaQuery.copy(currentPage = mediaQuery.currentPage + direction)
 
-                val result = withContext(GuildIdContext(interaction.data.guildId.value)){ dataSource.query(query) }
+                val result = withContext(GuildIdContext(interaction.data.guildId.value)) { dataSource.query(query) }
                 when (result) {
                     is MediaResult.Failure -> {
                         interaction.message.addReaction(ReactionEmoji.Unicode("\uD83D\uDD25"))
@@ -164,7 +164,19 @@ class MediaQueryKordModule(
             }
             if (componentId == "freeze") {
                 interaction.message.edit {
-                    components = mutableListOf()
+                    val linkButtons = interaction.message.buttons.filter { it.style == ButtonStyle.Link }
+                    if (linkButtons.isNotEmpty()) {
+                        actionRow {
+                            linkButtons.forEach { button ->
+                                linkButton(
+                                    button.url!!
+                                ) {
+                                    label = button.label
+                                    emoji(button.emoji as ReactionEmoji.Unicode)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -275,7 +287,7 @@ class MediaQueryKordModule(
             Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
             val guild = message.getGuildOrNull()
 
-            withContext(GuildIdContext(guild?.id)){
+            withContext(GuildIdContext(guild?.id)) {
                 process(message)
             }
         }
@@ -284,7 +296,7 @@ class MediaQueryKordModule(
             Sentry.addBreadcrumb("${message.channelId.value}-${message.id.value}")
             val message = getMessage()
             val guild = message.getGuildOrNull()
-            withContext(GuildIdContext(guild?.id)){
+            withContext(GuildIdContext(guild?.id)) {
                 process(message)
             }
         }
@@ -310,33 +322,33 @@ val MediaResult.Success.messageBuilder: MessageBuilder.() -> Unit
                 .filter { !it.isPrimary }
                 .filter { preference.availableMediaLinkIds.contains(it.id) }
                 .windowed(3, 3, partialWindows = true).forEach {
-                actionRow {
-                    it.forEach { link ->
-                        linkButton(link.url) {
-                            label = when (link.id) {
-                                MediaLink.Id.AniList -> "AniList"
-                                MediaLink.Id.MyAnimeList -> "MyAnimeList"
-                                MediaLink.Id.Kitsu -> "Kitsu"
-                                MediaLink.Id.MangaUpdates -> "MangaUpdates"
-                                MediaLink.Id.AnimePlanet -> "AnimePlanet"
-                                MediaLink.Id.AnimeNewsNetwork -> "AnimeNewsNetwork"
-                                MediaLink.Id.Shikimori -> "Shikimori"
-                                else -> link.id.id.uppercase()
-                            }
-                            when (link.id) {
-                                MediaLink.Id.AniList -> emoji(ReactionEmoji.Unicode("\uD83C\uDF38"))
-                                MediaLink.Id.MyAnimeList -> emoji(ReactionEmoji.Unicode("\uD83D\uDCDD"))
-                                MediaLink.Id.Kitsu -> emoji(ReactionEmoji.Unicode("\uD83E\uDD8A"))
-                                MediaLink.Id.MangaUpdates -> emoji(ReactionEmoji.Unicode("\uD83D\uDD14"))
-                                MediaLink.Id.AnimePlanet -> emoji(ReactionEmoji.Unicode("\uD83E\uDE90"))
-                                MediaLink.Id.AnimeNewsNetwork -> emoji(ReactionEmoji.Unicode("\uD83D\uDCF0"))
-                                MediaLink.Id.Shikimori -> emoji(ReactionEmoji.Unicode("⛩\uFE0F"))
-                                else -> {}
+                    actionRow {
+                        it.forEach { link ->
+                            linkButton(link.url) {
+                                label = when (link.id) {
+                                    MediaLink.Id.AniList -> "AniList"
+                                    MediaLink.Id.MyAnimeList -> "MyAnimeList"
+                                    MediaLink.Id.Kitsu -> "Kitsu"
+                                    MediaLink.Id.MangaUpdates -> "MangaUpdates"
+                                    MediaLink.Id.AnimePlanet -> "AnimePlanet"
+                                    MediaLink.Id.AnimeNewsNetwork -> "AnimeNewsNetwork"
+                                    MediaLink.Id.Shikimori -> "Shikimori"
+                                    else -> link.id.id.uppercase()
+                                }
+                                when (link.id) {
+                                    MediaLink.Id.AniList -> emoji(ReactionEmoji.Unicode("\uD83C\uDF38"))
+                                    MediaLink.Id.MyAnimeList -> emoji(ReactionEmoji.Unicode("\uD83D\uDCDD"))
+                                    MediaLink.Id.Kitsu -> emoji(ReactionEmoji.Unicode("\uD83E\uDD8A"))
+                                    MediaLink.Id.MangaUpdates -> emoji(ReactionEmoji.Unicode("\uD83D\uDD14"))
+                                    MediaLink.Id.AnimePlanet -> emoji(ReactionEmoji.Unicode("\uD83E\uDE90"))
+                                    MediaLink.Id.AnimeNewsNetwork -> emoji(ReactionEmoji.Unicode("\uD83D\uDCF0"))
+                                    MediaLink.Id.Shikimori -> emoji(ReactionEmoji.Unicode("⛩\uFE0F"))
+                                    else -> {}
+                                }
                             }
                         }
                     }
                 }
-            }
         }
         actionRow(mediaQuery)
     }
