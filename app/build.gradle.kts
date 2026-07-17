@@ -108,7 +108,7 @@ apollo {
             schemaFile.set(file("src/main/graphql/schema.graphqls"))
         }
 
-        plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin:1.0.3")
+        plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin:1.0.6")
         pluginArgument("com.apollographql.cache.packageName", packageName.get())
     }
 }
