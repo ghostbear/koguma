@@ -1,12 +1,16 @@
-<configuration>
+<configuration debug="true">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
+            <pattern>%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} -%kvp- %msg%n</pattern>
         </encoder>
     </appender>
+
+    <logger name="dev.kord" level="WARN" />
+    <logger name="io.ktor.client" level="WARN" />
+    <logger name="me.ghostbear" level="INFO" />
 
     <!-- Strictly speaking, the level attribute is not necessary since -->
     <!-- the level of the root level is set to DEBUG by default.       -->

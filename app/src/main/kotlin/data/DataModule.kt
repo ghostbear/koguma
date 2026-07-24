@@ -10,6 +10,7 @@ import com.apollographql.ktor.http.KtorHttpEngine
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
 import me.ghostbear.koguma.core.mediaQueryMatch.MediaQueryMatcher
 import me.ghostbear.koguma.core.mediaQueryMatch.mediaQueryMatch.InterpreterMediaQueryMatcher
@@ -30,6 +31,11 @@ val dataModule = module {
             expectSuccess = false
             install(ContentNegotiation) {
                 json()
+            }
+
+            install(Logging) {
+                logger = Logger.DEFAULT
+                level = LogLevel.INFO
             }
         }
     }

@@ -100,7 +100,7 @@ class MangabakaMedia(
     override val format: MediaFormat?
         get() = when (value.type) {
             MangabakaMediaType.MANGA -> MediaFormat.MANGA
-            MangabakaMediaType.MANWHA -> MediaFormat.MANGA
+            MangabakaMediaType.MANHWA -> MediaFormat.MANGA
             MangabakaMediaType.MANHUA -> MediaFormat.MANGA
             MangabakaMediaType.OEL -> MediaFormat.MANGA
             MangabakaMediaType.NOVEL -> MediaFormat.NOVEL
@@ -134,7 +134,7 @@ class MangabakaMedia(
         get() = when (value.type) {
             MangabakaMediaType.MANGA -> 0xe32636
             MangabakaMediaType.NOVEL -> 0x5d8aa8
-            MangabakaMediaType.MANWHA -> 0xffbf00
+            MangabakaMediaType.MANHWA -> 0xffbf00
             MangabakaMediaType.MANHUA -> 0xa4c639
             MangabakaMediaType.OEL -> 0x9966cc
             MangabakaMediaType.OTHER -> 0xf2f3f4

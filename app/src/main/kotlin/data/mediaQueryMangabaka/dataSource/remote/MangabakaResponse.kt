@@ -82,8 +82,8 @@ enum class MangabakaMediaType {
     MANGA,
     @SerialName("novel")
     NOVEL,
-    @SerialName("manwha")
-    MANWHA,
+    @SerialName("manhwa")
+    MANHWA,
     @SerialName("manhua")
     MANHUA,
     @SerialName("oel")

@@ -12,6 +12,8 @@ import me.ghostbear.koguma.domain.mediaQuery.dataSource.MediaDataSource
 import me.ghostbear.koguma.domain.mediaQuery.model.MediaQuery
 import me.ghostbear.koguma.domain.mediaQuery.model.MediaResult
 import me.ghostbear.koguma.domain.mediaQuery.model.MediaType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class MangabakaMediaDataSource(private val httpClient: HttpClient) : MediaDataSource {
 
@@ -63,7 +65,8 @@ class MangabakaMediaDataSource(private val httpClient: HttpClient) : MediaDataSo
                 }
             }
         } catch (e: Exception) {
-            throw e
+            log.error("Failed to fetch media", e)
+            return MediaResult.Failure("Error fetching media", mediaQuery)
         }
 
         if (response.isError) {
@@ -84,6 +87,7 @@ class MangabakaMediaDataSource(private val httpClient: HttpClient) : MediaDataSo
     }
 
     companion object {
+        val log: Logger = LoggerFactory.getLogger(MangabakaMediaDataSource::class.java)
         val SuppoertedMediaTypes = listOf(MediaType.MANGA, MediaType.NOVEL)
     }
 }
