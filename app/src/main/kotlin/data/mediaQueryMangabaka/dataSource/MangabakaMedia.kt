@@ -67,14 +67,16 @@ class MangabakaMedia(
     override val title: String
         get() {
             return value.titles
-                ?.filter { it.isPrimary == true && (it.traits.any { trait -> trait ==  MangabakaMediaTitleTrait.NATIVE || trait == MangabakaMediaTitleTrait.OFFICIAL }) }
+                ?.filter { it.isPrimary == true || (it.traits.any { trait -> trait ==  MangabakaMediaTitleTrait.NATIVE || trait == MangabakaMediaTitleTrait.OFFICIAL }) }
                 ?.minByOrNull { title ->
-                    when {
-                        MangabakaMediaTitleTrait.NATIVE in title.traits && title.language.endsWith("Latn") -> 0
-                        title.language == "en" -> 1
-                        MangabakaMediaTitleTrait.NATIVE in title.traits -> 2
-                        else -> 3
+                    val isPrimary = title.isPrimary?.let { -1 } ?: 0
+                    val value = when {
+                        MangabakaMediaTitleTrait.NATIVE in title.traits && title.language.endsWith("Latn") -> 1
+                        title.language == "en" -> 2
+                        MangabakaMediaTitleTrait.NATIVE in title.traits -> 3
+                        else -> 4
                     }
+                    value - isPrimary
                 }
                 ?.title
                 ?: "Unknown title"
