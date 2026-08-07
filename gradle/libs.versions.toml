@@ -18,7 +18,7 @@ sentry = "6.16.0"
 apollo = "5.0.1"
 apollo-normalizedCache = "1.0.6"
 apollo-ktor-engine = "0.1.1"
-versions = "0.54.0"
+versions = "0.59.0"
 koin = "4.2.2"
 
 [libraries]
